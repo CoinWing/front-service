@@ -12,7 +12,7 @@ export default function SignupPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-10 rounded shadow-md w-full max-w-[630px]" style={{ aspectRatio: '630 / 430' }}>
+      <div className="bg-white p-10 rounded shadow-md w-full max-w-md" >
         <SignupForm onSwitch={handleSwitch} />
       </div>
     </div>
