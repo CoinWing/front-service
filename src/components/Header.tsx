@@ -2,12 +2,28 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
   const pathname = usePathname();
-  const hideHeader = pathname === '/login' || pathname === '/signup'
+  
+  // 로그인 상태 확인용 state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  if (hideHeader) return null;
+  useEffect(() => {
+    // 예: localStorage에 'token'이 있으면 로그인 상태로 간주
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, [pathname]); // 경로가 바뀔 때마다 확인
+
+
+  // 로그아웃 함수
+  const handleLogout = () => {
+    localStorage.removeItem('token');  // 토큰 삭제
+    setIsLoggedIn(false);
+    // 로그아웃 후 홈으로 이동하거나 새로고침 등 추가 작업 가능
+    window.location.href = '/'; // 간단하게 홈으로 이동
+  };
 
   return (
     <nav className="border-b bg-blue-900 text-white">
@@ -28,12 +44,27 @@ export default function Header() {
 
           {/* 오른쪽 */}
           <div className="flex items-center space-x-6">
-            <Link href="/login" className="hover:text-gray-300">
-              Log in
-            </Link>
-            <Link href="/signup" className="hover:text-gray-300">
-              Sign up
-            </Link>
+            {isLoggedIn ? (
+              <>
+                {/* 로그인 상태일 때 */}
+                <button
+                  onClick={handleLogout}
+                  className="hover:text-gray-300 cursor-pointer"
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                {/* 비로그인 상태일 때 */}
+                <Link href="/login" className="hover:text-gray-300">
+                  Log in
+                </Link>
+                <Link href="/signup" className="hover:text-gray-300">
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

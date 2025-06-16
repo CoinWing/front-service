@@ -37,7 +37,7 @@ export default function SignupForm({ onSwitch }: SignupFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-96">
       <h2 className="text-2xl font-bold text-left">Sign up</h2>
       <div className="flex gap-4">
         <input
@@ -46,7 +46,7 @@ export default function SignupForm({ onSwitch }: SignupFormProps) {
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
           required
-          className="p-2 border rounded w-full"
+          className="p-2 border rounded flex-1 w-full"
         />
         <input
           type="text"
@@ -54,7 +54,7 @@ export default function SignupForm({ onSwitch }: SignupFormProps) {
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
           required
-          className="p-2 border rounded w-full"
+          className="p-2 border rounded flex-1 w-full"
         />
       </div>
       <input
