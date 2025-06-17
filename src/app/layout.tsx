@@ -32,6 +32,9 @@ export default function RootLayout({
                   <Link href="/pricelist" className="hover:text-primary">
                     Price List
                   </Link>
+                  <Link href="/pricelist" className="hover:text-primary">
+                    Chart
+                  </Link>
                 </div>
               </div>
             </div>
