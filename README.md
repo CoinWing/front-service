@@ -4,7 +4,9 @@
 </div>
 
 ## Installation
-- 현재 개발 진행 중입니다.
+```
+npm i chartjs chartjs-chart-financial chartjs-adapter-date-fns axios 
+```
 <br/>
 
 ## How to Test
