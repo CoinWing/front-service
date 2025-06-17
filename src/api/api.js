@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const getCoin = {
-    getCandles: ({ marketCode, time, timeCnt }) => {
+    getCandles: ({ marketCode, time, timeCnt}) => {
 
         if (time == 'minutes') {
             return axios
