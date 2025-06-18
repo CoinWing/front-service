@@ -7,6 +7,7 @@ import MarketList from "@/components/market-list"
 import TradeForm from "@/components/trade-form"
 import CryptoSummary from "@/components/crypto-summary"
 import OrderBookView from "@/components/order-book-view"
+import CandleChart from "@/components/CandleChart"
 
 export default function ExchangePage() {
   return (
@@ -17,7 +18,11 @@ export default function ExchangePage() {
         <div className="border rounded-md overflow-hidden">
           <CryptoSummary />
         </div>
-
+        <div className="grid grid-cols-2 gap-2">
+          <div className="border rounded-md overflow-hidden">
+            <CandleChart />
+          </div>
+        </div>
         {/* Order Book and Trade Form Section - Split into two columns */}
         <div className="grid grid-cols-2 gap-2">
           <div className="border rounded-md overflow-hidden">
