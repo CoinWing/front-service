@@ -92,9 +92,7 @@ const WriteChart: React.FC<WriteChartProps> = ({ market, candle }) => {
                             display: true,
                             text: "가격",   
                         },
-                        beginAtZero: false,
-                        min: 145000000,
-                        max: 150000000,
+                        beginAtZero: false, // 자동 min/max 설정
                     },
                 },
                 plugins: {

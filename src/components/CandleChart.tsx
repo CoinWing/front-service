@@ -4,7 +4,6 @@ import React, { useEffect } from "react";
 import dynamic from 'next/dynamic';
 
 import { useCandleStore } from "@/store/candleStore";
-import { Chart } from "chart.js";
 
 
 // 마켓 코드, 3분봉 차트 예시 하드 코딩
@@ -33,8 +32,8 @@ export const CandleChart = () => {
       <h2>캔들 차트</h2>
       
       <canvas id="candle-chart" width={800} height={400}></canvas>
-
       <ChartComponent market={MARKET_CODE} candle={candles}></ChartComponent>
+      
     </div>
   )
 }
