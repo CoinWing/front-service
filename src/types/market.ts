@@ -64,4 +64,5 @@ export interface MarketState {
   disconnect: () => void; // WebSocket 연결 해제
   setSelectedMarket: (market: string) => void; // 선택된 마켓 설정
   initializeMarkets: () => Promise<MarketInfo[]>; // 마켓 정보 초기화
+
 } 
