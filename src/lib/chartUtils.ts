@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from "react";
 import { Chart, TimeScale, Tooltip, Legend, ChartType, LinearScale } from "chart.js/auto";
 import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
 import "chartjs-adapter-date-fns"; // 날짜 포맷팅을 위한 어댑터
+import zoomPlugin from 'chartjs-plugin-zoom';
 
 // Chart.js candlestick chart controller 등록
 Chart.register(
@@ -11,7 +12,8 @@ Chart.register(
   TimeScale,
   Tooltip,
   Legend,
-  LinearScale
+  LinearScale,
+  zoomPlugin,
   // 그 외... 등록할 요소들
 )
 
@@ -52,7 +54,7 @@ const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef, time
         // console.log("차트에 들어가는 data:", candle);
 
         // 차트 생성
-        new Chart(ctx, {
+        const chart = new Chart(ctx, {
             type: "candlestick",
             data: {
                 datasets: [
@@ -80,7 +82,7 @@ const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef, time
                         type: "time",
                         time: {
                             // day, hour, millisecond, minute, month, quarter, second, week, year
-                            unit: "hour",
+                            unit: timeUnit,
                         },
                         title: {
                             display: true,
@@ -99,12 +101,27 @@ const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef, time
                     tooltip: {
                         mode: 'nearest',
                         intersect: true,
-                        // callbacks: {
-                        //     label: function (context: any) {
-                        //         const { o, h, l, c } = context.raw;
-                        //         return `시가: ${o}, 고가: ${h}, 저가: ${l}, 종가: ${c}`;
-                        //     },
-                        // },
+                        callbacks: {
+                            label: function (context: any) {
+                                const { o, h, l, c } = context.raw;
+                                return `시가: ${o}, 고가: ${h}, 저가: ${l}, 종가: ${c}`;
+                            },
+                        },
+                    },
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'x',
+                        },
+                        zoom: {
+                            wheel: {
+                                enabled: true,
+                            },
+                            pinch: {
+                                enabled: true,
+                            },
+                            mode: 'x',
+                        },
                     },
                 },
             },
