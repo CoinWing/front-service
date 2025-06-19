@@ -18,7 +18,7 @@ export default function ExchangePage() {
         <div className="border rounded-md overflow-hidden">
           <CryptoSummary />
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="mx-auto grid grid-cols-2 gap-2">
           <div className="border rounded-md overflow-hidden">
             <CandleChart />
           </div>

@@ -34,11 +34,11 @@ export default function Header() {
             <Link href="/" className="text-xl font-bold hover:text-gray-300">
               CoWing
             </Link>
-            <Link href="/orderbook" className="hover:text-gray-300">
-              Order Book
+            <Link href="/exchange" className="hover:text-gray-300">
+              모의거래소
             </Link>
-            <Link href="/pricelist" className="hover:text-gray-300">
-              Price List
+            <Link href="/chart" className="hover:text-gray-300">
+              차트
             </Link>
           </div>
 
@@ -51,17 +51,17 @@ export default function Header() {
                   onClick={handleLogout}
                   className="hover:text-gray-300 cursor-pointer"
                 >
-                  Log out
+                  로그아웃
                 </button>
               </>
             ) : (
               <>
                 {/* 비로그인 상태일 때 */}
                 <Link href="/login" className="hover:text-gray-300">
-                  Log in
+                  로그인
                 </Link>
                 <Link href="/signup" className="hover:text-gray-300">
-                  Sign up
+                  회원가입
                 </Link>
               </>
             )}
