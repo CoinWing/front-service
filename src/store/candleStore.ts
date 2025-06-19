@@ -28,6 +28,10 @@ interface CandleStoreState {
     set_timeUnit: (timeUnit: string) => Promise<void>
 }
 
+async function delay(ms: any) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export const useCandleStore = create<CandleStoreState>((set, get) => ({
     candles: [],
     error: null,
@@ -98,12 +102,14 @@ export const useCandleStore = create<CandleStoreState>((set, get) => ({
 
                 // 가장 오래된 데이터 시간
                 const oldtime = candles[0];
-                console.log(oldtime, candles[candles.length - 1], '우히히');
                 toDatetime = new Date(oldtime.x).toISOString();
 
                 if (oldtime.x < week) break;
 
                 if (candles.length < 200) break;
+
+                await delay(100); // 지연
+
             }
 
 
