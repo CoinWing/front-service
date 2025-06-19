@@ -25,13 +25,13 @@ interface Candle {
     c: number; // 종가
 }
 
+type TimeUnit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
 interface WriteChartProps {
     market: string;
     candle: Candle[];
     canvasRef: React.RefObject<HTMLCanvasElement>;
-    timeUnit: string;
+    timeUnit: TimeUnit;
 }
-
 
 // candlestick 차트
 const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef, timeUnit }) => {
