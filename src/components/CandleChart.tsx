@@ -18,7 +18,7 @@ const ChartComponent = dynamic(() => import("@/lib/chartUtils").then(mod => mod.
 });
 
 export const CandleChart = () => {
-  const { candles, error, selected_market, selected_time, set_selectedTime,  set_selectedMarket, fetchCandles, fetchAdditionCandles } = useCandleStore();
+  const { candles, error, selected_market, selected_time, timeUnit ,set_selectedTime,  set_selectedMarket, set_timeUnit ,fetchCandles, fetchAdditionCandles } = useCandleStore();
   const  { markets, initializeMarkets }  = useMarketStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -29,11 +29,8 @@ export const CandleChart = () => {
 
   useEffect(() => {
     if(selected_market) {
-      console.log(selected_time, '히히');
       fetchCandles();
       fetchAdditionCandles();
-
-      console.log(candles, '캔들');
     }
   }, [selected_market, selected_time]);
 
@@ -45,7 +42,13 @@ export const CandleChart = () => {
     const selected = e.target.options[e.target.selectedIndex];
     const selectedCnt = selected.getAttribute("date-cnt");
 
-    set_selectedTime(selected.value.slice(0, 7), Number(selectedCnt));
+    const time = selected.value.split("_");
+
+    console.log(time);
+    set_selectedTime(time[0], Number(time[1]));
+    set_timeUnit(time[2]);
+
+    console.log(time)
   }
   
   if (error) {
@@ -69,13 +72,13 @@ export const CandleChart = () => {
 
         <div className="relative">
           <select className="px-4 py-2 border rounded-md bg-white text-gray-700 hover:border-gray-400 focus:outline-none focus:ring focus:ring-blue-200" onChange={selectedTime} defaultValue={'minutes_30'}>
-            <option key={'second'} value={'seconds'} date-cnt={0}>초</option>
-            <option key={'minute_1'} value={'minutes_1'} date-cnt={1}>1분</option>
-            <option key={'minute_3'} value={'minutes_3'} date-cnt={3}>3분</option>
-            <option key={'minute_5'} value={'minutes_5'} date-cnt={5}>5분</option>
-            <option key={'minute_10'} value={'minutes_10'} date-cnt={10}>10분</option>
-            <option key={'minute_15'} value={'minutes_15'} date-cnt={15}>15분</option>
-            <option key={'minute_30'} value={'minutes_30'} date-cnt={30} >30분</option>
+            <option key={'second'} value={'seconds_second'} date-cnt={0}>초</option>
+            <option key={'minute_1'} value={'minutes_1_minute'} date-cnt={1}>1분</option>
+            <option key={'minute_3'} value={'minutes_3_minute'} date-cnt={3}>3분</option>
+            <option key={'minute_5'} value={'minutes_5_minute'} date-cnt={5}>5분</option>
+            <option key={'minute_10'} value={'minutes_10_minute'} date-cnt={10}>10분</option>
+            <option key={'minute_15'} value={'minutes_15_minute'} date-cnt={15}>15분</option>
+            <option key={'minute_30'} value={'minutes_30_hour'} date-cnt={30} >30분</option>
             <option>1시간</option>
 
           </select>
@@ -84,7 +87,7 @@ export const CandleChart = () => {
       
       <canvas ref={canvasRef} id="candle-chart" width={800} height={400}></canvas>
 
-      <ChartComponent market={selected_market} candle={candles} canvasRef={canvasRef} timeUnit={''}></ChartComponent>
+      <ChartComponent market={selected_market} candle={candles} canvasRef={canvasRef} timeUnit={timeUnit}></ChartComponent>
       
     </div>
   )
