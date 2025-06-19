@@ -18,7 +18,7 @@ const ChartComponent = dynamic(() => import("@/lib/chartUtils").then(mod => mod.
 });
 
 export const CandleChart = () => {
-  const { candles, error, selected_market, selected_time, set_selectedTime,  set_selectedMarket, fetchCandles } = useCandleStore();
+  const { candles, error, selected_market, selected_time, set_selectedTime,  set_selectedMarket, fetchCandles, fetchAdditionCandles } = useCandleStore();
   const  { markets, initializeMarkets }  = useMarketStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -30,7 +30,10 @@ export const CandleChart = () => {
   useEffect(() => {
     if(selected_market) {
       console.log(selected_time, '히히');
-      fetchCandles(selected_market, selected_time.time, selected_time.cnt);
+      fetchCandles();
+      fetchAdditionCandles();
+
+      console.log(candles, '캔들');
     }
   }, [selected_market, selected_time]);
 
@@ -81,10 +84,12 @@ export const CandleChart = () => {
       
       <canvas ref={canvasRef} id="candle-chart" width={800} height={400}></canvas>
 
-      <ChartComponent market={selected_market} candle={candles} canvasRef={canvasRef}></ChartComponent>
+      <ChartComponent market={selected_market} candle={candles} canvasRef={canvasRef} timeUnit={''}></ChartComponent>
       
     </div>
   )
 }
+
+
 
 export default CandleChart;
