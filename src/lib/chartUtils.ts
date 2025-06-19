@@ -52,6 +52,8 @@ const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef, time
         }
 
         // console.log("차트에 들어가는 data:", candle);
+        console.log(candle.length, "길이");
+        console.log(candle[0], candle[candle.length - 1])
 
         // 차트 생성
         const chart = new Chart(ctx, {
@@ -88,6 +90,8 @@ const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef, time
                             display: true,
                             text: "시간",
                         },
+                        min: candle[candle.length - 200].x, // 초기 표시 범위 시작
+                        max: candle[candle.length - 1].x, // 초기 표시 범위 끝
                     },
                     y: {
                         title: {
