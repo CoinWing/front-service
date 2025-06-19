@@ -15,6 +15,14 @@ Chart.register(
   // 그 외... 등록할 요소들
 )
 
+declare module "chart.js" {
+    interface ChartDatasetProperties<TType extends ChartType, TData> {
+        upColor?: string; // 상승 캔들의 색상
+        downColor?: string; // 하락 캔들의 색상
+        borderColor?: string; // 캔들의 테두리 색상
+    } 
+}
+
 interface Candle {
     x: number; // 시간 (timestamp)
     o: number; // 시가
@@ -23,29 +31,30 @@ interface Candle {
     c: number; // 종가
 }
 
+type list = Candle[];
+
 interface WriteChartProps {
-    market: string;
-    candle: Candle[];
-    canvasRef: React.RefObject<HTMLCanvasElement>;
+    market: string; // 마켓 코드
+    candle: list; // 캔들 데이터 배열
 }
 
 
 // candlestick 차트
-const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef }) => {
+const WriteChart: React.FC<WriteChartProps> = ({ market, candle }) => {
     
     useEffect(() => {
 
+        console.log(candle);
+
         // 캔버스 요소 가져오기
-        const ctx = canvasRef.current;
-        
+        const ctx = document.getElementById('candle-chart') as HTMLCanvasElement;
         
         // 캔버스가 존재하지 않으면 종료
         if (!ctx) return;
 
-        // 이미 차트가 존재하면 제거
-        const exisChart = Chart.getChart(ctx);
-        if(exisChart) {
-            exisChart.destroy();
+        if (Chart.getChart(ctx)) {
+            // 이미 차트가 존재하면 제거
+            Chart.getChart(ctx)?.destroy();
         }
 
         // console.log("차트에 들어가는 data:", candle);
@@ -59,16 +68,9 @@ const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef }) =>
                     {
                         label: market,
                         data: candle,
-                        borderColors: {
-                            up: 'rgba(200, 0, 13, 0.8)',
-                            down: 'rgba(0, 0, 200, 0.8)',
-                            unchanged: 'rgba(143, 143, 143, 1)'
-                        },
-                        backgroundColors: {
-                            up: 'rgba(200, 0, 13, 0.8)',
-                            down: 'rgba(0, 0, 200, 0.8)',
-                            unchanged: 'rgba(143, 143, 143, 1)'
-                        }
+                        upColor: "rgba(200, 0, 0, 0.8)",
+                        downColor: "rgba(0, 13, 200,0.8)",
+                        borderColor: "rgba(0, 0, 0, 0.8)",
                     },
                 ],
             },
@@ -95,19 +97,17 @@ const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef }) =>
                 },
                 plugins: {
                     tooltip: {
-                        mode: 'nearest',
-                        intersect: true,
-                        // callbacks: {
-                        //     label: function (context: any) {
-                        //         const { o, h, l, c } = context.raw;
-                        //         return `시가: ${o}, 고가: ${h}, 저가: ${l}, 종가: ${c}`;
-                        //     },
-                        // },
+                        callbacks: {
+                            label: function (context: any) {
+                                const { o, h, l, c } = context.raw;
+                                return `시가: ${o}, 고가: ${h}, 저가: ${l}, 종가: ${c}`;
+                            },
+                        },
                     },
                 },
             },
     });
-}, [market, candle]);
+}, []);
 
     return null;
 };
