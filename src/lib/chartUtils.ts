@@ -45,6 +45,12 @@ const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef, time
         // 캔버스가 존재하지 않으면 종료
         if (!ctx) return;
 
+        // candle 데이터가 없거나 비어있으면 종료
+        if (!candle || candle.length === 0) {
+            console.log("Candle data is empty or undefined");
+            return;
+        }
+
         // 이미 차트가 존재하면 제거
         const exisChart = Chart.getChart(ctx);
         if(exisChart) {
@@ -90,7 +96,7 @@ const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef, time
                             display: true,
                             text: "시간",
                         },
-                        min: candle[candle.length - 200].x, // 초기 표시 범위 시작
+                        min: candle.length > 200 ? candle[candle.length - 200].x : candle[0].x, // 초기 표시 범위 시작
                         max: candle[candle.length - 1].x, // 초기 표시 범위 끝
                     },
                     y: {
@@ -130,7 +136,7 @@ const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef, time
                 },
             },
     });
-}, [market, candle]);
+}, [market, candle, timeUnit]);
 
     return null;
 };
