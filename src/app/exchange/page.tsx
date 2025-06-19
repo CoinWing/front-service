@@ -18,10 +18,8 @@ export default function ExchangePage() {
         <div className="border rounded-md overflow-hidden">
           <CryptoSummary />
         </div>
-        <div className="mx-auto grid grid-cols-2 gap-2">
-          <div className="border rounded-md overflow-hidden">
-            <CandleChart />
-          </div>
+        <div className="flex-1 border rounded-md overflow-hidden">
+          <CandleChart />
         </div>
         {/* Order Book and Trade Form Section - Split into two columns */}
         <div className="grid grid-cols-2 gap-2">
