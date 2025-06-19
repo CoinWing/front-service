@@ -19,11 +19,13 @@ interface CandleStoreState {
     error: string | null;
     selected_market: string;
     selected_time: Selected_time;
+    timeUnit: string;
 
     fetchCandles: () => Promise<void>;
     fetchAdditionCandles: () => Promise<void>;
     set_selectedMarket: (selected_market: string) => Promise<void>;
     set_selectedTime: (time: string, cnt: number | null) => Promise<void>
+    set_timeUnit: (timeUnit: string) => Promise<void>
 }
 
 export const useCandleStore = create<CandleStoreState>((set, get) => ({
@@ -31,6 +33,7 @@ export const useCandleStore = create<CandleStoreState>((set, get) => ({
     error: null,
     selected_market: 'KRW-BTC',
     selected_time: { time: 'minutes', cnt: 30 },
+    timeUnit: 'hour',
 
 
     fetchCandles: async () => {
@@ -65,6 +68,10 @@ export const useCandleStore = create<CandleStoreState>((set, get) => ({
 
     set_selectedTime: async (time: string, cnt: number | null) => {
         set({ selected_time: { time, cnt } });
+    },
+
+    set_timeUnit: async (timeUnit: string) => {
+        set({ timeUnit: timeUnit });
     },
 
     fetchAdditionCandles: async () => {
