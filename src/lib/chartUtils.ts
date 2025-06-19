@@ -27,11 +27,12 @@ interface WriteChartProps {
     market: string;
     candle: Candle[];
     canvasRef: React.RefObject<HTMLCanvasElement>;
+    timeUnit: string;
 }
 
 
 // candlestick 차트
-const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef }) => {
+const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef, timeUnit }) => {
     
     useEffect(() => {
 
@@ -78,7 +79,8 @@ const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef }) =>
                     x: {
                         type: "time",
                         time: {
-                            unit: "minute",
+                            // day, hour, millisecond, minute, month, quarter, second, week, year
+                            unit: "hour",
                         },
                         title: {
                             display: true,
