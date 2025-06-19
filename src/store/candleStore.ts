@@ -62,18 +62,6 @@ export const useCandleStore = create<CandleStoreState>((set, get) => ({
         }
     },
 
-    set_selectedMarket: async (market: string) => {
-        set({ selected_market: market });
-    },
-
-    set_selectedTime: async (time: string, cnt: number | null) => {
-        set({ selected_time: { time, cnt } });
-    },
-
-    set_timeUnit: async (timeUnit: string) => {
-        set({ timeUnit: timeUnit });
-    },
-
     fetchAdditionCandles: async () => {
 
         const market_code = get().selected_market;
@@ -94,7 +82,9 @@ export const useCandleStore = create<CandleStoreState>((set, get) => ({
                     datetime: toDatetime,
                 });
 
-                if (!response || response.data) break;
+                if (!response || !response.data) {
+                    break;
+                }
 
                 const candles = response.data.map((candle: any) => ({
                     x: new Date(candle.candle_date_time_kst).getTime(),
@@ -107,7 +97,8 @@ export const useCandleStore = create<CandleStoreState>((set, get) => ({
                 allCandles = [...allCandles, ...candles];
 
                 // 가장 오래된 데이터 시간
-                const oldtime = candles[candles.length - 1];
+                const oldtime = candles[0];
+                console.log(oldtime, candles[candles.length - 1], '우히히');
                 toDatetime = new Date(oldtime.x).toISOString();
 
                 if (oldtime.x < week) break;
@@ -128,9 +119,20 @@ export const useCandleStore = create<CandleStoreState>((set, get) => ({
 
             set({ candles: resultCandles });
 
-            console.log(get().candles, '후...')
         } catch (error: unknown) {
             set({ error: error instanceof Error ? error.message: String(error) });
         }
+    },
+
+        set_selectedMarket: async (market: string) => {
+        set({ selected_market: market });
+    },
+
+    set_selectedTime: async (time: string, cnt: number | null) => {
+        set({ selected_time: { time, cnt } });
+    },
+
+    set_timeUnit: async (timeUnit: string) => {
+        set({ timeUnit: timeUnit });
     },
 }));
