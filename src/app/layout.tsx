@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import Header from "../components/Header"
+import WebSocketProvider from "@/components/WebSocketProvider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -20,9 +21,11 @@ export default function RootLayout({
       <body className={`${inter.className} h-full`}>
         <div className="min-h-full">
           <Header />
-          <div className="pt-10">
-            {children}
-          </div>
+          <WebSocketProvider>
+            <div className="pt-10">
+              {children}
+            </div>
+          </WebSocketProvider>
         </div>
       </body>
     </html>
