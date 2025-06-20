@@ -382,11 +382,14 @@ export const useMarketStore = create<MarketState>((set, get) => ({
   },
 
   disconnect: () => {
-    const { ws } = get();
-    if (ws) {
-      ws.close(1000, 'User initiated disconnect');
-      set({ ws: null, isConnecting: false, subscribedMarkets: new Set() });
-    }
+    // 페이지 전환을 막지 않도록 연결 해제 로직을 비동기 처리합니다.
+    setTimeout(() => {
+      const { ws } = get();
+      if (ws) {
+        ws.close(1000, 'User initiated disconnect');
+        set({ ws: null, subscribedMarkets: new Set() });
+      }
+    }, 0);
   },
 
   setSelectedMarket: (market: string) => {

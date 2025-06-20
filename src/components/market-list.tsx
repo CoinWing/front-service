@@ -1,23 +1,10 @@
 "use client"
 
-import { useEffect, useCallback } from "react"
 import { useMarketStore } from "@/store/marketStore"
 import { MarketInfo } from "@/types/market"
 
 export default function MarketList() {
-  const { markets, tickers, connect, isConnecting, error, ws } = useMarketStore();
-
-  // connect 함수를 메모이제이션
-  const handleConnect = useCallback(() => {
-    if (!ws && !isConnecting) {
-      connect();
-    }
-  }, [connect, ws, isConnecting]);
-
-  useEffect(() => {
-    // 컴포넌트 마운트 시에만 연결 시도
-    handleConnect();
-  }, [handleConnect]);
+  const { markets, tickers, error, isLoading } = useMarketStore();
 
   // 현재가 표시 및 전일 대비 거래량(24H)용 함수
   const currentAndChangePriceFormat = (beforeNumber: number) => {
@@ -54,7 +41,7 @@ export default function MarketList() {
   };
 
   // 연결 상태에 따른 UI 표시
-  if (isConnecting) {
+  if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
         <div className="text-center">

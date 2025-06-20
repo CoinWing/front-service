@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect } from "react"
+import { useMarketStore } from "@/store/marketStore"
 import SearchBar from "@/components/search-bar"
 import MarketTabs from "@/components/market-tabs"
 import MarketSortBar from "@/components/market-sort-bar"
@@ -10,6 +12,18 @@ import OrderBookView from "@/components/order-book-view"
 import CandleChart from "@/components/CandleChart"
 
 export default function ExchangePage() {
+  useEffect(() => {
+    const { connect, ws, isConnecting } = useMarketStore.getState();
+    if (!ws && !isConnecting) {
+      connect();
+    }
+
+    return () => {
+      const { disconnect } = useMarketStore.getState();
+      disconnect();
+    };
+  }, []);
+
   return (
     <main className="grid grid-cols-3 gap-2 min-h-screen p-4 md:p-8 bg-gray-50">
       {/* Left section - 2/3 width (2 columns) */}
