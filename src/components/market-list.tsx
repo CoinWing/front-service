@@ -1,10 +1,18 @@
 "use client"
 
+import { useEffect } from "react"
 import { useMarketStore } from "@/store/marketStore"
 import { MarketInfo } from "@/types/market"
 
 export default function MarketList() {
-  const { markets, tickers } = useMarketStore();
+  const { markets, tickers, connect, isConnecting, error } = useMarketStore();
+
+  useEffect(() => {
+    // 웹소켓이 연결되지 않은 경우에만 연결 시도
+    if (!isConnecting) {
+      connect();
+    }
+  }, [connect, isConnecting]);
 
   // 현재가 표시 및 전일 대비 거래량(24H)용 함수
   const currentAndChangePriceFormat = (beforeNumber: number) => {
@@ -39,6 +47,29 @@ export default function MarketList() {
     const isPriceUp = changeRate > 0;
     return isPriceUp ? 'text-red-600' : 'text-blue-600';
   };
+
+  // 연결 상태에 따른 UI 표시
+  if (isConnecting) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+        <div className="text-center text-gray-500"> 실제 거래소에서 실시간 데이터를 연동하고 있습니다.</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-pulse rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <div className="text-center text-gray-500"> 거래소와의 연동이 실패하였습니다. 새로고침해 주세요. </div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="h-screen overflow-y-scroll">

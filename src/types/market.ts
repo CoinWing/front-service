@@ -57,6 +57,7 @@ export interface MarketState {
   error: string | null; // 에러 메시지
   currentPrice: number | null; // 현재 가격
   ws: WebSocket | null; // WebSocket 연결
+  isConnecting: boolean; // WebSocket 연결 중 상태
   subscribedMarkets: Set<string>; // 구독 중인 마켓
   tradeData: Record<string, TradeData[]>; // 거래 데이터
   markets: MarketInfo[]; // 마켓 정보
@@ -65,4 +66,5 @@ export interface MarketState {
   setSelectedMarket: (market: string) => void; // 선택된 마켓 설정
   initializeMarkets: () => Promise<MarketInfo[]>; // 마켓 정보 초기화
   loadInitialTickers: () => Promise<Record<string, TickerData>>; // 초기 시세 데이터 로드
+  loadInitialData: () => Promise<{ tickers: Record<string, TickerData>; orderbooks: Record<string, OrderbookData>; trades: TradeData[] }>; // 초기 데이터 전체 로드
 } 

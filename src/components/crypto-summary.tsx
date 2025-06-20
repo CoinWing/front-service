@@ -97,24 +97,8 @@ export default function CryptoSummary() {
   if (isLoading) {
     return (
       <div className="w-full max-w-10xl mx-auto bg-white border rounded-md shadow p-4">
-        <div className="text-center text-gray-500">로딩 중...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full max-w-10xl mx-auto bg-white border rounded-md shadow p-4">
-        <div className="text-center text-red-500">
-          <p>연결 오류가 발생했습니다.</p>
-          <p className="text-sm mt-2">{error}</p>
-          <button 
-            onClick={() => connect()}
-            className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-          >
-            재연결 시도
-          </button>
-        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+        <div className="text-center text-gray-500">잠시만 기다려주세요! 실제 거래소에서 실시간 데이터를 연동하고 있습니다.</div>
       </div>
     );
   }
@@ -122,15 +106,18 @@ export default function CryptoSummary() {
   if (!ticker) {
     return (
       <div className="w-full max-w-10xl mx-auto bg-white border rounded-md shadow p-4">
-        <div className="text-center text-gray-500">
-          <p>데이터가 없습니다.</p>
-          <p className="text-sm mt-2">선택된 마켓: {selectedMarket}</p>
-          <button 
-            onClick={() => connect()}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-          >
-            재연결 시도
-          </button>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+        <div className="text-center text-gray-500">'{selectedMarket}' 정보를 불러오고 있어요!</div>
+    </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full max-w-10xl mx-auto bg-white border rounded-md shadow p-4">
+        <div className="text-center">
+          <div className="animate-pulse rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <div className="text-center text-gray-500"> 거래소와의 연동이 실패하였습니다. 새로고침해 주세요. </div>
         </div>
       </div>
     );
