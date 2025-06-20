@@ -20,7 +20,9 @@ export default function RootLayout({
       <body className={`${inter.className} h-full`}>
         <div className="min-h-full">
           <Header />
-          {children}
+          <div className="pt-10">
+            {children}
+          </div>
         </div>
       </body>
     </html>

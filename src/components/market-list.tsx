@@ -77,7 +77,7 @@ export default function MarketList() {
   }
   
   return (
-    <div className="h-screen overflow-y-scroll">
+    <div className="h-[calc(100vh-10rem)] overflow-y-scroll">
       {markets.map((market) => (
         <div key={market.market} className="flex items-center py-3 border-b text-sm">
           <div className="flex-1 flex items-center px-2">
