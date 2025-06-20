@@ -45,7 +45,8 @@ export default function CryptoSummary() {
     disconnect,
     setSelectedMarket,
     markets,
-    initializeMarkets
+    initializeMarkets,
+    loadInitialTickers
   } = useMarketStore();
 
   // URL 파라미터에서 마켓 정보 읽기
@@ -67,19 +68,28 @@ export default function CryptoSummary() {
   }, [searchParams, markets, setSelectedMarket, router])
 
   useEffect(() => {
-    console.log('Component mounted, connecting to WebSocket...');
-    initializeMarkets();
-    connect();
+    console.log('Component mounted, initializing...');
+    
+    const initialize = async () => {
+      try {
+        // 마켓 정보 초기화
+        await initializeMarkets();
+        // 초기 시세 데이터 로드
+        await loadInitialTickers();
+        // WebSocket 연결
+        await connect();
+      } catch (error) {
+        console.error('Initialization failed:', error);
+      }
+    };
+
+    initialize();
+
     return () => {
       console.log('Component unmounting, disconnecting from WebSocket...');
       disconnect();
     };
-  }, [connect, disconnect, initializeMarkets]);
-
-  useEffect(() => {
-    console.log('Current tickers:', tickers);
-    console.log('Selected market:', selectedMarket);
-  }, [tickers, selectedMarket]);
+  }, [connect, disconnect, initializeMarkets, loadInitialTickers]);
 
   const ticker = tickers[selectedMarket];
   const selectedMarketInfo = markets.find(m => m.market === selectedMarket);
@@ -99,7 +109,7 @@ export default function CryptoSummary() {
           <p>연결 오류가 발생했습니다.</p>
           <p className="text-sm mt-2">{error}</p>
           <button 
-            onClick={connect}
+            onClick={() => connect()}
             className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
           >
             재연결 시도
@@ -116,7 +126,7 @@ export default function CryptoSummary() {
           <p>데이터가 없습니다.</p>
           <p className="text-sm mt-2">선택된 마켓: {selectedMarket}</p>
           <button 
-            onClick={connect}
+            onClick={() => connect()}
             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
           >
             재연결 시도

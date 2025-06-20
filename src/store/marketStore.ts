@@ -18,7 +18,7 @@ const UPBIT_API_URL = 'https://api.upbit.com/v1';
 // 마켓 정보를 가져오는 함수
 const fetchMarkets = async (): Promise<MarketInfo[]> => {
   try {
-    const response = await fetch(`${UPBIT_API_URL}/market/all?isDetails=true`);
+    const response = await fetch(`${UPBIT_API_URL}/market/all?isDetails=false`);
     if (!response.ok) {
       throw new Error('Failed to fetch markets');
     }
@@ -28,6 +28,29 @@ const fetchMarkets = async (): Promise<MarketInfo[]> => {
   } catch (error) {
     console.error('Error fetching markets:', error);
     return [];
+  }
+};
+
+// 초기 시세 데이터를 가져오는 함수
+const fetchInitialTickers = async (markets: MarketInfo[]) => {
+  try {
+    const marketCodes = markets.map(market => market.market).join(',');
+    const response = await fetch(`${UPBIT_API_URL}/ticker?markets=${marketCodes}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch tickers');
+    }
+    const tickers = await response.json();
+    
+    // tickers를 객체로 변환
+    const tickersObject: Record<string, any> = {};
+    tickers.forEach((ticker: any) => {
+      tickersObject[ticker.market] = ticker;
+    });
+    
+    return tickersObject;
+  } catch (error) {
+    console.error('Error fetching tickers:', error);
+    return {};
   }
 };
 
@@ -55,8 +78,34 @@ export const useMarketStore = create<MarketState>((set, get) => ({
     }
   },
 
+  // 초기 시세 데이터 로드
+  loadInitialTickers: async () => {
+    const { markets } = get();
+    if (markets.length === 0) {
+      await get().initializeMarkets();
+    }
+    
+    set({ isLoading: true });
+    try {
+      const tickers = await fetchInitialTickers(markets);
+      const currentPrice = tickers[get().selectedMarket]?.trade_price || null;
+      
+      set({ 
+        tickers, 
+        currentPrice, 
+        isLoading: false 
+      });
+      
+      console.log('Initial tickers loaded:', Object.keys(tickers).length, 'markets');
+      return tickers;
+    } catch (error) {
+      set({ error: '초기 시세 데이터를 가져오는데 실패했습니다.', isLoading: false });
+      return {};
+    }
+  },
+
   connect: async () => {
-    const { ws, subscribedMarkets, markets } = get();
+    const { ws, markets } = get();
     if (ws) return;
 
     set({ isLoading: true, error: null });
@@ -66,6 +115,9 @@ export const useMarketStore = create<MarketState>((set, get) => ({
       await get().initializeMarkets();
     }
 
+    // 초기 시세 데이터 로드
+    await get().loadInitialTickers();
+
     const websocket = new WebSocket(UPBIT_WS_URL);
 
     websocket.onopen = () => {
@@ -73,27 +125,28 @@ export const useMarketStore = create<MarketState>((set, get) => ({
       
       const marketCodes = get().markets.map((market: MarketInfo) => market.market);
       
+      // WebSocket 구독 - 실시간 업데이트만
       const subscribeMessage = [
         { ticket: 'UNIQUE_TICKET' },
-        ...marketCodes.map((market: string) => ({
+        {
           type: 'ticker',
-          codes: [market],
+          codes: marketCodes,
           isOnlyRealtime: true
-        })),
-        ...marketCodes.map((market: string) => ({
+        },
+        {
           type: 'orderbook',
-          codes: [market],
+          codes: marketCodes,
           isOnlyRealtime: true
-        })),
-        ...marketCodes.map((market: string) => ({
+        },
+        {
           type: 'trade',
-          codes: [market],
+          codes: marketCodes,
           isOnlyRealtime: true
-        })),
+        }
       ];
       
       websocket.send(JSON.stringify(subscribeMessage));
-      marketCodes.forEach((market: string) => subscribedMarkets.add(market));
+      console.log('WebSocket connected and subscribed to', marketCodes.length, 'markets');
     };
 
     websocket.onmessage = (event) => {
@@ -133,7 +186,7 @@ export const useMarketStore = create<MarketState>((set, get) => ({
                 t => new Date(t.trade_timestamp).toDateString() === today
               );
               const alreadyExists = prev.some(t => t.trade_timestamp === data.trade_timestamp);
-              const updated = alreadyExists ? prev : [data, ...prev];
+              const updated = alreadyExists ? prev : [data, ...prev].slice(0, 100); // 최대 100개만 유지
               return {
                 tradeData: {
                   ...state.tradeData,
@@ -167,33 +220,7 @@ export const useMarketStore = create<MarketState>((set, get) => ({
   },
 
   setSelectedMarket: (market: string) => {
-    const { ws, subscribedMarkets, tickers } = get();
-    if (!ws) return;
-
-    if (subscribedMarkets.size > 0) {
-      const unsubscribeMessage = [
-        { ticket: 'UNIQUE_TICKET' },
-        ...Array.from(subscribedMarkets).map(market => ({
-          type: 'ticker',
-          codes: [market],
-          isOnlyRealtime: true
-        }))
-      ];
-      ws.send(JSON.stringify(unsubscribeMessage));
-      subscribedMarkets.clear();
-    }
-
-    const subscribeMessage = [
-      { ticket: 'UNIQUE_TICKET' },
-      {
-        type: 'ticker',
-        codes: [market],
-        isOnlyRealtime: true
-      }
-    ];
-    ws.send(JSON.stringify(subscribeMessage));
-    subscribedMarkets.add(market);
-
+    const { tickers } = get();
     const currentPrice = tickers[market]?.trade_price || null;
     set({ selectedMarket: market, currentPrice });
   }
