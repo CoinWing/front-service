@@ -3,13 +3,13 @@
 import { useEffect } from "react"
 import { useMarketStore } from "@/store/marketStore"
 import { useSearchParams } from 'next/navigation'
-import SearchBar from "@/components/search-bar"
-import MarketTabs from "@/components/market-tabs"
-import MarketSortBar from "@/components/market-sort-bar"
-import MarketList from "@/components/market-list"
-import TradeForm from "@/components/trade-form"
-import CryptoSummary from "@/components/crypto-summary"
-import OrderBookView from "@/components/order-book-view"
+import SearchBar from "@/components/SearchBar"
+import MarketTabs from "@/components/MarketTabs"
+import MarketSortBar from "@/components/MarketSortBar"
+import MarketList from "@/components/MarketList"
+import TradeForm from "@/components/TradeForm"
+import CryptoSummary from "@/components/CryptoSummary"
+import OrderBookView from "@/components/OrderBookView"
 import CandleChart from "@/components/CandleChart"
 
 export default function ExchangePage() {

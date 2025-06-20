@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { useMarketStore } from "@/store/marketStore"
-import GeneralAskingPrice from "./general-asking-price";
-import GeneralAskingTotalPrice from "./general-asking-total-price";
-import CumulativeAskingPrice from "./cumulative-asking-price";
+import GeneralAskingPrice from "./GeneralAskingPrice";
+import GeneralAskingTotalPrice from "./GeneralAskingTotalPrice";
+import CumulativeAskingPrice from "./CumulativeAskingPrice";
 
 export default function OrderBookView() {
   const { connect } = useMarketStore();

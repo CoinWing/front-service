@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getCoin } from '../api/api.js';
+import { getCoin } from '@/app/api/api';
 
 interface Candle {
     x: number; // 시간 timestamp
