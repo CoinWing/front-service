@@ -252,25 +252,46 @@ export const useMarketStore = create<MarketState>((set, get) => ({
             const marketCode = data.code;
             
             set(state => {
+              // 기존 데이터와 동일한지 확인하여 불필요한 업데이트 방지
+              const existingTicker = state.tickers[marketCode];
+              if (existingTicker && 
+                  existingTicker.trade_price === data.trade_price &&
+                  existingTicker.signed_change_rate === data.signed_change_rate) {
+                return state; // 변경사항이 없으면 상태 업데이트하지 않음
+              }
+
               const newTickers = {
                 ...state.tickers,
                 [marketCode]: data
               };
               
-              const currentPrice = marketCode === state.selectedMarket ? data.trade_price : state.currentPrice;
+              // currentPrice는 selectedMarket과 일치할 때만 업데이트
+              let newCurrentPrice = state.currentPrice;
+              if (marketCode === state.selectedMarket) {
+                newCurrentPrice = data.trade_price;
+              }
               
               return {
                 tickers: newTickers,
-                currentPrice
+                currentPrice: newCurrentPrice
               };
             });
           } else if (data.type === 'orderbook') {
-            set(state => ({
-              orderbooks: {
-                ...state.orderbooks,
-                [data.code]: data
+            set(state => {
+              // 기존 데이터와 동일한지 확인
+              const existingOrderbook = state.orderbooks[data.code];
+              if (existingOrderbook && 
+                  existingOrderbook.timestamp === data.timestamp) {
+                return state; // 변경사항이 없으면 상태 업데이트하지 않음
               }
-            }));
+
+              return {
+                orderbooks: {
+                  ...state.orderbooks,
+                  [data.code]: data
+                }
+              };
+            });
           } else if (data.type === 'trade') {
             // 실시간 체결 데이터 누적 저장 (오늘 날짜만 유지, 중복 trade_timestamp 방지)
             set(state => {
@@ -279,7 +300,13 @@ export const useMarketStore = create<MarketState>((set, get) => ({
                 t => new Date(t.trade_timestamp).toDateString() === today
               );
               const alreadyExists = prev.some(t => t.trade_timestamp === data.trade_timestamp);
-              const updated = alreadyExists ? prev : [data, ...prev].slice(0, 100); // 최대 100개만 유지
+              
+              // 중복된 데이터가 있으면 상태 업데이트하지 않음
+              if (alreadyExists) {
+                return state;
+              }
+              
+              const updated = [data, ...prev].slice(0, 100); // 최대 100개만 유지
               return {
                 tradeData: {
                   ...state.tradeData,

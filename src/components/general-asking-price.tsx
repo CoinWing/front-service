@@ -1,9 +1,16 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useMarketStore } from "@/store/marketStore"
 
 export default function GeneralAskingPrice() {
   const { orderbooks, tickers, selectedMarket, connect, tradeData, isConnecting, error, isLoading, ws } = useMarketStore();
   const [isInitialDataLoaded, setIsInitialDataLoaded] = useState(false);
+
+  // connect 함수를 메모이제이션
+  const handleConnect = useCallback(() => {
+    if (!ws && !isConnecting) {
+      connect();
+    }
+  }, [connect, ws, isConnecting]);
 
   useEffect(() => {
     // 초기 데이터가 로드되었는지 확인
@@ -13,11 +20,9 @@ export default function GeneralAskingPrice() {
   }, [tickers, orderbooks]);
 
   useEffect(() => {
-    // 웹소켓이 연결되지 않은 경우에만 연결 시도
-    if (!isConnecting && !ws) {
-      connect();
-    }
-  }, [connect, isConnecting, ws]);
+    // 컴포넌트 마운트 시에만 연결 시도
+    handleConnect();
+  }, [handleConnect]);
 
   const orderbook = orderbooks[selectedMarket];
   const ticker = tickers[selectedMarket];
