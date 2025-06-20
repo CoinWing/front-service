@@ -8,31 +8,35 @@ export default function MarketList() {
 
   // 현재가 표시 및 전일 대비 거래량(24H)용 함수
   const currentAndChangePriceFormat = (beforeNumber: number) => {
+    const value = beforeNumber || 0;
     return new Intl.NumberFormat('ko-KR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
-    }).format(beforeNumber);
+    }).format(value);
   };
 
   // 거래대금(24H) 표시 함수
   const price24hFormat = (price: number) => {
+    const value = price || 0;
     return new Intl.NumberFormat('ko-KR', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
-    }).format(price / 1_000_000);
+    }).format(value / 1_000_000);
   };
 
   // 전일대비 비율 표시 함수
   const changeRateFormat = (rate: number) => {
+    const value = rate || 0;
     return new Intl.NumberFormat('ko-KR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    }).format(rate * 100);
+    }).format(value * 100);
   };
 
   // 전일대비 비율 색상 표시 함수
   const changeRatePriceColor = (market: MarketInfo) => {
-    const isPriceUp = tickers[market.market]?.signed_change_rate > 0;
+    const changeRate = tickers[market.market]?.signed_change_rate || 0;
+    const isPriceUp = changeRate > 0;
     return isPriceUp ? 'text-red-600' : 'text-blue-600';
   };
   

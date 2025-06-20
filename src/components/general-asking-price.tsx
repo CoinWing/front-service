@@ -12,15 +12,15 @@ export default function GeneralAskingPrice() {
   const ticker = tickers[selectedMarket];
   const asks = orderbook?.orderbook_units?.slice(0, 30) ?? [];
   const bids = orderbook?.orderbook_units?.slice(0, 30) ?? [];
-  const change = ticker ? (ticker.signed_change_rate * 100).toFixed(2) + "%" : "";
+  const change = ticker ? ((ticker.signed_change_rate || 0) * 100).toFixed(2) + "%" : "0.00%";
   const trades = tradeData?.[selectedMarket] ?? [];
   
   // 체결강도 계산
-  const tradeStrength = ticker ? ((ticker.acc_bid_volume / ticker.acc_ask_volume) * 100).toFixed(2) : '0.00';
+  const tradeStrength = ticker ? ((ticker.acc_bid_volume || 0) / (ticker.acc_ask_volume || 1) * 100).toFixed(2) : '0.00';
   
   // 거래량: 정수, 거래대금: 백만원 단위(소수점 2자리)
-  const formattedVolume = ticker ? Math.floor(ticker.acc_trade_volume_24h).toLocaleString() : '-';
-  const formattedPrice = ticker ? (ticker.acc_trade_price_24h / 1_000_000).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '-';
+  const formattedVolume = ticker ? Math.floor(ticker.acc_trade_volume_24h || 0).toLocaleString() : '0';
+  const formattedPrice = ticker ? ((ticker.acc_trade_price_24h || 0) / 1_000_000).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '0';
   
   return (
     <div className="bg-white h-full flex flex-col">
@@ -34,9 +34,9 @@ export default function GeneralAskingPrice() {
                   key={idx}
                   className={`grid grid-cols-2 items-center h-8 px-3 text-sm border-b border-gray-100 hover:bg-gray-100 bg-blue-50`}
                 >
-                  <div className="text-gray-700 text-right font-medium pr-2">{item.ask_size.toLocaleString()}</div>
+                  <div className="text-gray-700 text-right font-medium pr-2">{(item.ask_size || 0).toLocaleString()}</div>
                   <div className="flex items-center gap-x-4 justify-center">
-                    <span className="text-red-600 font-bold">{item.ask_price.toLocaleString()}</span>
+                    <span className="text-red-600 font-bold">{(item.ask_price || 0).toLocaleString()}</span>
                     <span className="text-red-600 font-medium">{change}</span>
                   </div>
                 </div>
@@ -65,18 +65,18 @@ export default function GeneralAskingPrice() {
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 text-sm">고가</span>
                 <div className="text-right">
-                  <div className="font-bold text-red-600">{ticker ? ticker.high_price.toLocaleString() : '-'}</div>
+                  <div className="font-bold text-red-600">{ticker ? (ticker.high_price || 0).toLocaleString() : '0'}</div>
                 </div>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 text-sm">저가</span>
                 <div className="text-right">
-                  <div className="font-bold text-blue-600">{ticker ? ticker.low_price.toLocaleString() : '-'}</div>
+                  <div className="font-bold text-blue-600">{ticker ? (ticker.low_price || 0).toLocaleString() : '0'}</div>
                 </div>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 text-sm">전일종가</span>
-                <div className="font-bold">{ticker ? ticker.prev_closing_price.toLocaleString() : '-'}</div>
+                <div className="font-bold">{ticker ? (ticker.prev_closing_price || 0).toLocaleString() : '0'}</div>
               </div>
             </div>
           </div>
@@ -97,9 +97,9 @@ export default function GeneralAskingPrice() {
           <div className="h-96 overflow-y-hidden">
             {trades.map((item, index) => (
               <div key={index} className="flex items-center py-1 text-xs hover:bg-gray-100">
-                <div className={`w-28 pr-4 text-center font-medium text-black-500`}>{item.trade_price.toLocaleString()}</div>
+                <div className={`w-28 pr-4 text-center font-medium text-black-500`}>{(item.trade_price || 0).toLocaleString()}</div>
                 <div className={`flex-1 text-right font-medium pr-4 ${item.ask_bid === 'ASK' ? 'text-blue-600' : 'text-red-600'}`}>
-                  {Math.floor(item.trade_price * item.trade_volume).toLocaleString()}
+                  {Math.floor((item.trade_price || 0) * (item.trade_volume || 0)).toLocaleString()}
                 </div>
               </div>
             ))}
@@ -115,10 +115,10 @@ export default function GeneralAskingPrice() {
                   className="grid grid-cols-2 items-center h-8 px-3 text-sm border-b border-gray-100 hover:bg-gray-100 bg-red-50"
                 >
                   <div className="flex items-center gap-x-4 justify-center">
-                    <span className="text-red-600 font-bold">{item.bid_price.toLocaleString()}</span>
+                    <span className="text-red-600 font-bold">{(item.bid_price || 0).toLocaleString()}</span>
                     <span className="text-red-600 font-medium pr-6">{change}</span>
                   </div>
-                  <div className="text-gray-700 text-left font-medium pl-2">{item.bid_size.toLocaleString()}</div>
+                  <div className="text-gray-700 text-left font-medium pl-2">{(item.bid_size || 0).toLocaleString()}</div>
                 </div>
             ))}
           </div>
