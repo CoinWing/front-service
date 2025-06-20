@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { useMarketStore } from "@/store/marketStore"
+import { useSearchParams } from 'next/navigation'
 import SearchBar from "@/components/search-bar"
 import MarketTabs from "@/components/market-tabs"
 import MarketSortBar from "@/components/market-sort-bar"
@@ -12,6 +13,9 @@ import OrderBookView from "@/components/order-book-view"
 import CandleChart from "@/components/CandleChart"
 
 export default function ExchangePage() {
+  const { setSelectedMarket } = useMarketStore();
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     const { connect, ws, isConnecting } = useMarketStore.getState();
     if (!ws && !isConnecting) {
@@ -23,6 +27,13 @@ export default function ExchangePage() {
       disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    const market = searchParams.get('market');
+    if (market) {
+      setSelectedMarket(market);
+    }
+  }, [searchParams, setSelectedMarket]);
 
   return (
     <main className="grid grid-cols-3 gap-2 min-h-screen p-4 md:p-8 bg-gray-50">
@@ -46,13 +57,20 @@ export default function ExchangePage() {
         </div>
       </div>
 
-      {/* Right section - 1/3 width (1 column) - Sticky position */}
-      <div className="col-span-1">
-        <div className="sticky top-4 h-[calc(100vh-2rem)] flex flex-col gap-2">
-          <SearchBar />
-          <div className="h-[calc(100vh-10rem)] border rounded-md overflow-hidden flex-1 bg-white">
-            <MarketTabs />
-            <MarketSortBar />
+      {/* Right section - 1/3 width (1 column) */}
+      <div className="relative col-span-1">
+        <div className="sticky top-4 flex h-[calc(100vh-2rem)] flex-col gap-2">
+          {/* Non-scrolling part */}
+          <div className="flex-shrink-0">
+            <SearchBar />
+            <div className="mt-2 rounded-t-md border-x border-t bg-white">
+              <MarketTabs />
+              <MarketSortBar />
+            </div>
+          </div>
+
+          {/* Scrolling part */}
+          <div className="flex-1 rounded-b-md border-x border-b bg-white overflow-y-auto">
             <MarketList />
           </div>
         </div>
