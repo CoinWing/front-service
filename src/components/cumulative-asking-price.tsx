@@ -1,8 +1,15 @@
-import { useEffect, useCallback } from "react"
+import { useEffect } from "react"
 import { useMarketStore } from "@/store/marketStore"
 
 export default function CumulativeAskingPrice() {
-  const { orderbooks, selectedMarket, error, isLoading } = useMarketStore();
+  const { 
+    orderbooks, 
+    selectedMarket, 
+    error, 
+    isLoading, 
+    isConnecting, 
+    ws 
+  } = useMarketStore();
 
   const orderbook = orderbooks[selectedMarket];
   const asks = orderbook?.orderbook_units?.slice(0, 30) ?? [];
@@ -40,23 +47,20 @@ export default function CumulativeAskingPrice() {
     };
   });
 
-  // 초기 데이터 로딩 중
   if (isLoading && Object.keys(orderbooks).length === 0) {
     return (
-      <div className="bg-white h-screen flex items-center justify-center">
+      <div className="bg-white h-full flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
           <div className="text-gray-600">초기 데이터 로딩 중...</div>
-          <div className="text-xs text-gray-500 mt-1">REST API에서 데이터를 가져오는 중</div>
         </div>
       </div>
     );
   }
 
-  // 연결 에러
   if (error) {
     return (
-      <div className="bg-white h-screen flex items-center justify-center">
+      <div className="bg-white h-full flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-600 mb-2">연결 오류</div>
           <div className="text-sm text-gray-600 mb-4">{error}</div>
@@ -65,8 +69,33 @@ export default function CumulativeAskingPrice() {
     );
   }
 
+  const RealtimeIndicator = () => {
+    if (isConnecting) {
+      return (
+        <div className="bg-blue-50 border-b border-blue-200 px-4 py-2">
+          <div className="flex items-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+            <span className="text-sm text-blue-700">실시간 데이터 연동 중...</span>
+          </div>
+        </div>
+      );
+    }
+    if (ws?.readyState === WebSocket.OPEN) {
+      return (
+        <div className="bg-green-50 border-b border-green-200 px-4 py-2">
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+            <span className="text-sm text-green-700">실시간 데이터 연동됨</span>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  }
+
   return (
-    <div className="bg-white h-screen flex flex-col">
+    <div className="bg-white h-full flex flex-col">
+      <RealtimeIndicator />
       {/* 주문 영역 (본문) */}
       <div className="grid grid-cols-3 grid-rows-60">
         {/* 매도호가 영역 */}

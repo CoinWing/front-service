@@ -1,12 +1,21 @@
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState } from "react"
 import { useMarketStore } from "@/store/marketStore"
 
 export default function GeneralAskingPrice() {
-  const { orderbooks, tickers, selectedMarket, tradeData, error, isLoading } = useMarketStore();
+  const { 
+    orderbooks, 
+    tickers, 
+    selectedMarket, 
+    tradeData, 
+    error, 
+    isLoading, 
+    isConnecting, 
+    ws 
+  } = useMarketStore();
   const [isInitialDataLoaded, setIsInitialDataLoaded] = useState(false);
 
   useEffect(() => {
-    // 초기 데이터가 로드되었는지 확인
+    // This effect now only tracks if the initial data has been loaded
     if (Object.keys(tickers).length > 0 && Object.keys(orderbooks).length > 0) {
       setIsInitialDataLoaded(true);
     }
@@ -31,7 +40,7 @@ export default function GeneralAskingPrice() {
       <div className="bg-white h-full flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-          <div className="text-gray-600">데이터 로딩 중...</div>
+          <div className="text-gray-600">초기 데이터 로딩 중...</div>
         </div>
       </div>
     );
@@ -49,8 +58,37 @@ export default function GeneralAskingPrice() {
     );
   }
   
+  const RealtimeIndicator = () => {
+    if (isConnecting) {
+      return (
+        <div className="bg-blue-50 border-b border-blue-200 px-4 py-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+              <span className="text-sm text-blue-700">실시간 데이터 연동 중...</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    if (ws?.readyState === WebSocket.OPEN) {
+      return (
+        <div className="bg-green-50 border-b border-green-200 px-4 py-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+              <span className="text-sm text-green-700">실시간 데이터 연동됨</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  }
+  
   return (
     <div className="bg-white h-full flex flex-col">
+      <RealtimeIndicator />
       {/* 주문 영역 (본문) */}
       <div className="grid grid-cols-3 grid-rows-60">
         {/* 매도호가 영역 */}
