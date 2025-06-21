@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from "react";
 import { Chart, TimeScale, Tooltip, Legend, ChartType, LinearScale } from "chart.js/auto";
 import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
@@ -37,10 +36,8 @@ interface WriteChartProps {
 const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef, timeUnit }) => {
     
     useEffect(() => {
-
         // 캔버스 요소 가져오기
         const ctx = canvasRef.current;
-        
         
         // 캔버스가 존재하지 않으면 종료
         if (!ctx) return;
@@ -66,7 +63,6 @@ const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef, time
             type: "candlestick",
             data: {
                 datasets: [
-
                     {
                         label: market,
                         data: candle,
@@ -135,8 +131,8 @@ const WriteChart: React.FC<WriteChartProps> = ({ market, candle, canvasRef, time
                     },
                 },
             },
-    });
-}, [market, candle, timeUnit]);
+        });
+    }, [market, candle, timeUnit, canvasRef]);
 
     return null;
 };

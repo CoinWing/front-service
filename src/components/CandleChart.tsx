@@ -32,7 +32,7 @@ export const CandleChart = () => {
       // fetchCandles();
       fetchAdditionCandles();
     }
-  }, [selected_market, selected_time]);
+  }, [selected_market, selected_time, fetchAdditionCandles]);
 
   const selectedMarket = (e: React.ChangeEvent<HTMLSelectElement>) => {
     set_selectedMarket(e.target.value);

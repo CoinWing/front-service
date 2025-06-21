@@ -107,7 +107,7 @@ export default function CryptoSummary() {
     return (
       <div className="w-full max-w-10xl mx-auto bg-white border rounded-md shadow p-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-        <div className="text-center text-gray-500">'{selectedMarket}' 정보를 불러오고 있어요!</div>
+        <div className="text-center text-gray-500">&apos;{selectedMarket}&apos; 정보를 불러오고 있어요!</div>
     </div>
     );
   }
