@@ -1,8 +1,8 @@
 "use client"
 
+import { Suspense } from "react"
 import { useEffect } from "react"
 import { useMarketStore } from "@/store/marketStore"
-import { useSearchParams } from 'next/navigation'
 import SearchBar from "@/components/SearchBar"
 import MarketTabs from "@/components/MarketTabs"
 import MarketSortBar from "@/components/MarketSortBar"
@@ -12,9 +12,9 @@ import CryptoSummary from "@/components/CryptoSummary"
 import OrderBookView from "@/components/OrderBookView"
 import CandleChart from "@/components/CandleChart"
 
-export default function ExchangePage() {
+// useSearchParams를 사용하는 컴포넌트들을 별도로 분리
+function ExchangeContent() {
   const { setSelectedMarket } = useMarketStore();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     const { connect, ws, isConnecting } = useMarketStore.getState();
@@ -27,13 +27,6 @@ export default function ExchangePage() {
       disconnect();
     };
   }, []);
-
-  useEffect(() => {
-    const market = searchParams.get('market');
-    if (market) {
-      setSelectedMarket(market);
-    }
-  }, [searchParams, setSelectedMarket]);
 
   return (
     <main className="grid grid-cols-3 gap-2 min-h-screen p-4 md:p-8 bg-gray-50">
@@ -77,4 +70,21 @@ export default function ExchangePage() {
       </div>
     </main>
   )
+}
+
+// 로딩 컴포넌트
+function ExchangeLoading() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+    </div>
+  );
+}
+
+export default function ExchangePage() {
+  return (
+    <Suspense fallback={<ExchangeLoading />}>
+      <ExchangeContent />
+    </Suspense>
+  );
 }
