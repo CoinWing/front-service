@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { getCoin } from '@/app/api/api';
 
+// TimeUnit 타입 정의 추가
+type TimeUnit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+
 interface Candle {
     x: number; // 시간 timestamp
     o: number; // 시가
@@ -19,13 +22,13 @@ interface CandleStoreState {
     error: string | null;
     selected_market: string;
     selected_time: Selected_time;
-    timeUnit: string;
+    timeUnit: TimeUnit; // string에서 TimeUnit으로 변경
 
     fetchCandles: () => Promise<void>;
     fetchAdditionCandles: () => Promise<void>;
     set_selectedMarket: (selected_market: string) => Promise<void>;
     set_selectedTime: (time: string, cnt: number | null) => Promise<void>
-    set_timeUnit: (timeUnit: string) => Promise<void>
+    set_timeUnit: (timeUnit: TimeUnit) => Promise<void> // 매개변수 타입도 변경
 }
 
 async function delay(ms: any) {
@@ -37,7 +40,7 @@ export const useCandleStore = create<CandleStoreState>((set, get) => ({
     error: null,
     selected_market: 'KRW-BTC',
     selected_time: { time: 'minutes', cnt: 30 },
-    timeUnit: 'hour',
+    timeUnit: 'hour' as TimeUnit, // 타입 단언 추가
 
 
     fetchCandles: async () => {
@@ -138,7 +141,7 @@ export const useCandleStore = create<CandleStoreState>((set, get) => ({
         set({ selected_time: { time, cnt } });
     },
 
-    set_timeUnit: async (timeUnit: string) => {
+    set_timeUnit: async (timeUnit: TimeUnit) => { // 매개변수 타입 변경
         set({ timeUnit: timeUnit });
     },
 }));

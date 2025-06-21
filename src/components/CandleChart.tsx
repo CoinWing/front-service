@@ -44,7 +44,21 @@ export const CandleChart = () => {
 
     console.log(time);
     set_selectedTime(time[0], Number(time[1]));
-    set_timeUnit(time[2]);
+    
+    // timeUnit을 TimeUnit 타입으로 캐스팅
+    const timeUnitMap: Record<string, 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'> = {
+      'second': 'second',
+      'minute': 'minute', 
+      'hour': 'hour',
+      'day': 'day',
+      'week': 'week',
+      'month': 'month',
+      'quarter': 'quarter',
+      'year': 'year'
+    };
+    
+    const mappedTimeUnit = timeUnitMap[time[2]] || 'hour';
+    set_timeUnit(mappedTimeUnit);
 
     console.log(time)
   }
@@ -85,7 +99,12 @@ export const CandleChart = () => {
       
       <canvas ref={canvasRef} id="candle-chart" width={800} height={400}></canvas>
 
-      <ChartComponent market={selected_market} candle={candles} canvasRef={canvasRef} timeUnit={timeUnit}></ChartComponent>
+      <ChartComponent 
+        market={selected_market} 
+        candle={candles} 
+        canvasRef={canvasRef} 
+        timeUnit={timeUnit as 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'}
+      ></ChartComponent>
       
     </div>
   )
