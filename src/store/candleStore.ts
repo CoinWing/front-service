@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getCoin } from '@/app/api/api';
+import { getCoin } from '@/lib/upbitApi';
 
 // TimeUnit 타입 정의 추가
 type TimeUnit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
@@ -129,7 +129,7 @@ export const useCandleStore = create<CandleStoreState>((set, get) => ({
             set({ candles: resultCandles });
 
         } catch (error: unknown) {
-            set({ error: error instanceof Error ? error.message: String(error) });
+            set({ error: error instanceof Error ? error.message : String(error) });
         }
     },
 

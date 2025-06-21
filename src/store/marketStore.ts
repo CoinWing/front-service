@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { MarketState, MarketInfo } from '@/types/market';
+import { getMarkets, getTickers, getOrderbooks, getTrades } from '@/lib/upbitApi';
 
 // TradeData 타입 정의 (Upbit WebSocket trade 메시지 참고)
 export interface TradeData {
@@ -13,18 +14,12 @@ export interface TradeData {
 }
 
 const UPBIT_WS_URL = 'wss://api.upbit.com/websocket/v1';
-const UPBIT_API_URL = 'https://api.upbit.com/v1';
 
 // 마켓 정보를 가져오는 함수
 const fetchMarkets = async (): Promise<MarketInfo[]> => {
   try {
-    const response = await fetch(`${UPBIT_API_URL}/market/all?isDetails=false`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch markets');
-    }
-    const markets: MarketInfo[] = await response.json();
-    // KRW 마켓만 필터링
-    return markets.filter(market => market.market.startsWith('KRW-'));
+    const markets: MarketInfo[] = await getMarkets();
+    return markets;
   } catch (error) {
     console.error('Error fetching markets:', error);
     return [];
@@ -35,11 +30,7 @@ const fetchMarkets = async (): Promise<MarketInfo[]> => {
 const fetchInitialTickers = async (markets: MarketInfo[]) => {
   try {
     const marketCodes = markets.map(market => market.market).join(',');
-    const response = await fetch(`${UPBIT_API_URL}/ticker?markets=${marketCodes}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch tickers');
-    }
-    const tickers = await response.json();
+    const tickers = await getTickers(marketCodes);
     
     // tickers를 객체로 변환
     const tickersObject: Record<string, any> = {};
@@ -58,11 +49,7 @@ const fetchInitialTickers = async (markets: MarketInfo[]) => {
 const fetchInitialOrderbooks = async (markets: MarketInfo[]) => {
   try {
     const marketCodes = markets.map(market => market.market).join(',');
-    const response = await fetch(`${UPBIT_API_URL}/orderbook?markets=${marketCodes}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch orderbooks');
-    }
-    const orderbooks = await response.json();
+    const orderbooks = await getOrderbooks(marketCodes);
     
     // orderbooks를 객체로 변환
     const orderbooksObject: Record<string, any> = {};
@@ -80,11 +67,7 @@ const fetchInitialOrderbooks = async (markets: MarketInfo[]) => {
 // 초기 체결 데이터를 가져오는 함수
 const fetchInitialTrades = async (market: string) => {
   try {
-    const response = await fetch(`${UPBIT_API_URL}/trades/ticks?market=${market}&count=100`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch trades');
-    }
-    const trades = await response.json();
+    const trades = await getTrades(market, '100');
     
     // TradeData 형식으로 변환
     return trades.map((trade: any) => ({
