@@ -37,8 +37,11 @@ export default function Header() {
             <Link href="/exchange" className="hover:text-gray-300">
               모의거래소
             </Link>
-            <Link href="/chart" className="hover:text-gray-300">
-              차트
+            <Link href="/" className="hover:text-gray-300">
+              투자내역
+            </Link>
+            <Link href="/" className="hover:text-gray-300">
+              보유자산
             </Link>
           </div>
 
