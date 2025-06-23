@@ -32,6 +32,7 @@ export default function RootLayout({
               </footer>
             </div>
           </WebSocketProvider>
+          
         </div>
       </body>
     </html>

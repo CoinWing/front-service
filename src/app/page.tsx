@@ -134,6 +134,36 @@ export default function Page() {
           />
         </div>
       </div>
+
+      <div className="relative w-full min-h-screen snap-start px-6 py-20 bg-blue-50 flex flex-col items-center justify-between">
+        {/* 텍스트+버튼 영역을 감싸는 래퍼 */}
+        <div className="flex-1 flex items-center justify-center w-full">
+          <div className="max-w-4xl w-full mx-auto space-y-8 text-center">
+            <h2 className="text-blue-950 text-2xl sm:text-3xl font-bold leading-snug">
+              실전 같은 연습, 지금부터 시작하세요!<br />
+              리스크 없이 투자 감각을 키워보는 가장 스마트한 방법
+            </h2>
+            <div className="flex justify-center flex-wrap gap-4">
+              <Link href="/exchange">
+                <button className="px-6 py-3 bg-blue-600 text-white text-sm font-semibold rounded-md shadow hover:bg-blue-700 transition">
+                  지금 바로 시작하세요
+                </button>
+              </Link>
+              <Link href="/signup">
+                <button className="px-6 py-3 bg-white text-blue-700 border border-blue-700 text-sm font-semibold rounded-md shadow hover:bg-blue-50 transition">
+                  회원가입
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <footer className="w-full text-gray-600 text-right pt-16 border-t border-blue-100">
+          <p className="text-sm mr-4">&copy; {new Date().getFullYear()} Crypto Trading Platform. All rights reserved.</p>
+        </footer>
+      </div>
+
+
     </main>
   )
 }
