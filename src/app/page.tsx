@@ -26,12 +26,12 @@ export default function Page() {
                 가상 코인으로 투자 전략을 자유롭게 연습할 수 있습니다.
               </p>
               <div className="flex justify-start gap-4 mt-6">
-                <Link href="/exchange">
+                <Link href="/">
                   <button className="px-6 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md shadow hover:bg-blue-700 transition">
                     지금 바로 시작하세요
                   </button>
                 </Link>
-                <Link href="/signup">
+                <Link href="/">
                   <button className="px-6 py-2 bg-white text-blue-700 border border-blue-700 text-sm font-semibold rounded-md shadow hover:bg-blue-50 transition">
                     회원가입
                   </button>
@@ -132,12 +132,12 @@ export default function Page() {
               리스크 없이 투자 감각을 키워보는 가장 스마트한 방법
             </h2>
             <div className="flex justify-center flex-wrap gap-4">
-              <Link href="/exchange">
+              <Link href="/">
                 <button className="px-6 py-3 bg-blue-600 text-white text-sm font-semibold rounded-md shadow hover:bg-blue-700 transition">
                   지금 바로 시작하세요
                 </button>
               </Link>
-              <Link href="/signup">
+              <Link href="/">
                 <button className="px-6 py-3 bg-white text-blue-700 border border-blue-700 text-sm font-semibold rounded-md shadow hover:bg-blue-50 transition">
                   회원가입
                 </button>

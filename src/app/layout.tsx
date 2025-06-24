@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import Header from "@/components/Header"
-import WebSocketProvider from "@/providers/WebSocketProvider"
+// import WebSocketProvider from "@/providers/WebSocketProvider"
 import Footer from "@/components/Footer"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className={`${inter.className} h-full`}>
-        <WebSocketProvider>
+        {/* <WebSocketProvider> */}
           <div className="min-h-full">
             <Header />
             <div className="pt-10">
@@ -31,7 +31,7 @@ export default function RootLayout({
               <Footer />
             </div>
           </div>
-        </WebSocketProvider>
+        {/* </WebSocketProvider> */}
       </body>
     </html>
   )

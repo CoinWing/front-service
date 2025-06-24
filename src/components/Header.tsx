@@ -38,10 +38,10 @@ export default function Header() {
             <Link href="/" className="text-xl font-bold hover:text-gray-300">
               CoWing
             </Link>
-            <Link href="/exchange" className="hover:text-gray-300">
+            <Link href="/" className="hover:text-gray-300">
               모의거래소
             </Link>
-            <Link href="/investments" className="hover:text-gray-300">
+            <Link href="/" className="hover:text-gray-300">
               투자내역
             </Link>
             <Link href="/" className="hover:text-gray-300">
@@ -66,10 +66,10 @@ export default function Header() {
             ) : (
               <>
                 {/* 비로그인 상태일 때 */}
-                <Link href="/login" className="hover:text-gray-300">
+                <Link href="/" className="hover:text-gray-300">
                   로그인
                 </Link>
-                <Link href="/signup" className="hover:text-gray-300">
+                <Link href="/" className="hover:text-gray-300">
                   회원가입
                 </Link>
               </>
