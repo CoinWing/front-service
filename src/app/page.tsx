@@ -1,20 +1,10 @@
 "use client"
 
 import Link from "next/link";
-import { useEffect } from 'react';
 
 export default function Page() {
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, []);
-
-
   return (
-    <main className="h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth">
+    <main className="min-h-screen">
       <div className="relative w-full h-screen snap-start">
         <div className="relative w-full h-[60%] overflow-hidden">
           <img
@@ -79,7 +69,7 @@ export default function Page() {
         </div>
       </div>
 
-      <div className="relative w-full h-screen snap-start bg-blue-50 flex items-center justify-center px-6 py-12">
+      <div className="relative w-full h-screen bg-blue-50 flex items-center justify-center px-6 py-12">
         <div className="max-w-6xl w-full flex flex-col items-center text-center space-y-6">
           <div className="text-4xl sm:text-5xl font-extrabold text-blue-900 opacity-90">01</div>
           <h2 className="text-blue-950 text-2xl sm:text-3xl md:text-4xl font-bold leading-snug">
@@ -97,11 +87,9 @@ export default function Page() {
         </div>
       </div>
 
-      <div className="relative w-full h-screen snap-start bg-white flex items-center justify-center px-6 py-12">
+      <div className="relative w-full h-screen bg-white flex items-center justify-center px-6 py-12">
         <div className="max-w-6xl w-full flex flex-col items-center text-center space-y-6">
-
           <div className="text-4xl sm:text-5xl font-extrabold text-blue-900 opacity-90">02</div>
-
           <h2 className="text-blue-950 text-2xl sm:text-3xl md:text-4xl font-bold leading-snug">
             나의 모든 거래, 투명하게 기록!
           </h2>
@@ -117,7 +105,7 @@ export default function Page() {
         </div>
       </div>
 
-      <div className="relative w-full h-screen snap-start bg-blue-50 flex items-center justify-center px-6 py-12">
+      <div className="relative w-full h-screen bg-blue-50 flex items-center justify-center px-6 py-12">
         <div className="max-w-6xl w-full flex flex-col items-center text-center space-y-6">
           <div className="text-4xl sm:text-5xl font-extrabold text-blue-900 opacity-90">03</div>
           <h2 className="text-blue-950 text-2xl sm:text-3xl md:text-4xl font-bold leading-snug">
@@ -135,8 +123,7 @@ export default function Page() {
         </div>
       </div>
 
-      <div className="relative w-full min-h-screen snap-start px-6 py-20 bg-blue-50 flex flex-col items-center justify-between">
-        {/* 텍스트+버튼 영역을 감싸는 래퍼 */}
+      <div className="relative w-full h-[50vh] px-6 py-10 bg-blue-50 flex flex-col items-center justify-center">
         <div className="flex-1 flex items-center justify-center w-full">
           <div className="max-w-4xl w-full mx-auto space-y-8 text-center">
             <h2 className="text-blue-950 text-2xl sm:text-3xl font-bold leading-snug">
@@ -157,14 +144,7 @@ export default function Page() {
             </div>
           </div>
         </div>
-
-        <footer className="w-full text-gray-600 text-right pt-16 border-t border-blue-100">
-          <p className="text-sm mr-4">&copy; {new Date().getFullYear()} Crypto Trading Platform. All rights reserved.</p>
-        </footer>
       </div>
-
-
     </main>
   )
 }
-
