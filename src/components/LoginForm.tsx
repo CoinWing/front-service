@@ -34,10 +34,10 @@ export default function LoginForm({ onSwitch }: LoginFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <h2 className="text-2xl font-bold text-left">Log in</h2>
+      <h2 className="text-2xl font-bold text-left">로그인</h2>
       <input
         type="email"
-        placeholder="Email address"
+        placeholder="이메일 주소를 입력해주세요"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
@@ -45,7 +45,7 @@ export default function LoginForm({ onSwitch }: LoginFormProps) {
       />
       <input
         type="password"
-        placeholder="Password"
+        placeholder="비밀번호를 입력해주세요"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
@@ -55,7 +55,7 @@ export default function LoginForm({ onSwitch }: LoginFormProps) {
         type="submit"
         className="bg-blue-900 text-white py-2 rounded hover:bg-blue-700 transition"
       >
-        Log in
+        로그인
       </button>
       {onSwitch && (
         <p

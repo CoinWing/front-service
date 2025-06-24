@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
 import { useMarketStore } from "@/store/marketStore"
 import { Settings } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -34,8 +33,6 @@ const getSymbolFromTicker = (ticker: string) => {
 };
 
 export default function CryptoSummary() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
   const { 
     tickers, 
     selectedMarket, 
@@ -43,29 +40,10 @@ export default function CryptoSummary() {
     error,
     connect,
     disconnect,
-    setSelectedMarket,
     markets,
     initializeMarkets,
     loadInitialTickers
   } = useMarketStore();
-
-  // URL 파라미터에서 마켓 정보 읽기
-  useEffect(() => {
-    const marketFromUrl = searchParams.get('market')
-    if (marketFromUrl && markets.length > 0) {
-      // 유효한 마켓인지 확인
-      const isValidMarket = markets.some(m => m.market === marketFromUrl)
-      if (isValidMarket) {
-        setSelectedMarket(marketFromUrl)
-      } else {
-        // 유효하지 않은 마켓인 경우 기본값으로 리다이렉트
-        router.replace('/exchange?market=KRW-BTC')
-      }
-    } else if (!marketFromUrl && markets.length > 0) {
-      // URL 파라미터가 없는 경우 기본값으로 설정
-      router.replace('/exchange?market=KRW-BTC')
-    }
-  }, [searchParams, markets, setSelectedMarket, router])
 
   useEffect(() => {
     console.log('Component mounted, initializing...');
@@ -199,12 +177,23 @@ export default function CryptoSummary() {
               <div className="grid grid-cols-2 gap-4 items-center">
                 <div className="flex items-center">
                   <span className="text-gray-600">저가</span>
-                  <span className="font-small font-bold text-blue-600 whitespace-nowrap ml-2">{formatPrice(ticker.low_price)}</span>
+                  <span className=" font-bold text-blue-600 whitespace-nowrap ml-2">{formatPrice(ticker.low_price)}</span>
                 </div>
                 <div className="flex items-center">
                   <span className="text-gray-600 whitespace-nowrap">거래대금(24H)</span>
-                  <span className="font-small whitespace-nowrap pl-2">{formatPrice(ticker.acc_trade_price_24h)} <span className="text-sm text-gray-500">KRW</span></span>
+                  <span className="font-small whitespace-nowrap pl-2">{formatPrice(ticker.acc_trade_price_24h / 1_000_000)} <span className="text-gray-500">백만</span></span>
                 </div>
+              </div>
+            </div>
+          </div>
+          {/* 24H Change */}
+          <div className="col-span-1">
+            <div className="flex flex-col items-end">
+              <div className={`text-2xl font-bold ${priceColor}`}>
+                {formatChangeRate(ticker.signed_change_rate)}%
+              </div>
+              <div className={`text-sm ${priceColor}`}>
+                {formatPrice(ticker.signed_change_price)}
               </div>
             </div>
           </div>

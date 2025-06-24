@@ -63,7 +63,8 @@ export interface MarketState {
   markets: MarketInfo[]; // 마켓 정보
   connect: () => Promise<void>; // WebSocket 연결
   disconnect: () => void; // WebSocket 연결 해제
-  setSelectedMarket: (market: string) => void; // 선택된 마켓 설정
+  setSelectedMarket: (market: string) => Promise<void>; // 선택된 마켓 설정
+  restoreSelectedMarket: () => void; // 저장된 마켓 복원
   initializeMarkets: () => Promise<MarketInfo[]>; // 마켓 정보 초기화
   loadInitialTickers: () => Promise<Record<string, TickerData>>; // 초기 시세 데이터 로드
   loadInitialData: () => Promise<{ tickers: Record<string, TickerData>; orderbooks: Record<string, OrderbookData>; trades: TradeData[] }>; // 초기 데이터 전체 로드

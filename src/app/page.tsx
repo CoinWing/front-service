@@ -87,8 +87,9 @@ export default function Page() {
         </div>
       </div>
 
-      <div className="relative w-full h-screen bg-white flex items-center justify-center px-6 py-12">
+      <div className="relative w-full h-screen snap-start bg-white flex items-center justify-center px-6 py-12">
         <div className="max-w-6xl w-full flex flex-col items-center text-center space-y-6">
+
           <div className="text-4xl sm:text-5xl font-extrabold text-blue-900 opacity-90">02</div>
           <h2 className="text-blue-950 text-2xl sm:text-3xl md:text-4xl font-bold leading-snug">
             나의 모든 거래, 투명하게 기록!

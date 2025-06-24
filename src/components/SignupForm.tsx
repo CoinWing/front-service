@@ -38,11 +38,11 @@ export default function SignupForm({ onSwitch }: SignupFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-96">
-      <h2 className="text-2xl font-bold text-left">Sign up</h2>
+      <h2 className="text-2xl font-bold text-left">회원가입</h2>
       <div className="flex gap-4">
         <input
           type="text"
-          placeholder="First name"
+          placeholder="이름을 입력해주세요"
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
           required
@@ -50,7 +50,7 @@ export default function SignupForm({ onSwitch }: SignupFormProps) {
         />
         <input
           type="text"
-          placeholder="Last name"
+          placeholder="성을 입력해주세요"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
           required
@@ -59,7 +59,7 @@ export default function SignupForm({ onSwitch }: SignupFormProps) {
       </div>
       <input
         type="email"
-        placeholder="Email address"
+        placeholder="이메일 주소를 입력해주세요"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
@@ -67,7 +67,7 @@ export default function SignupForm({ onSwitch }: SignupFormProps) {
       />
       <input
         type="password"
-        placeholder="Create password"
+        placeholder="비밀번호를 입력해주세요"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
@@ -77,7 +77,7 @@ export default function SignupForm({ onSwitch }: SignupFormProps) {
         type="submit"
         className="bg-blue-900 text-white py-2 rounded hover:bg-blue-700 transition"
       >
-        Sign up
+        회원가입
       </button>
       {onSwitch && (
         <p

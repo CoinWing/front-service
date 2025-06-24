@@ -1,11 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Info } from "lucide-react"
+import { useMarketStore } from "@/store/marketStore"
 
 export default function TradeForm() {
+  const { tickers, selectedMarket } = useMarketStore();
   const [activeTab, setActiveTab] = useState("매수")
-  const [price, setPrice] = useState("146,673,000")
+  const [price, setPrice] = useState("")
   const [selectedPercentage, setSelectedPercentage] = useState("")
 
   const tabs = [
@@ -14,6 +16,16 @@ export default function TradeForm() {
   ]
 
   const percentages = ["10%", "25%", "50%", "100%", "직접입력"]
+
+  // 선택된 마켓의 현재가를 가격 입력란에 설정
+  useEffect(() => {
+    const currentPrice = tickers[selectedMarket]?.trade_price;
+    if (currentPrice) {
+      setPrice(new Intl.NumberFormat('ko-KR').format(currentPrice));
+    }
+  }, [selectedMarket, tickers]);
+
+  const currentPrice = tickers[selectedMarket]?.trade_price || 0;
 
   return (
     <div className="w-full bg-white border rounded-md">
@@ -63,7 +75,7 @@ export default function TradeForm() {
       {/* Price Input */}
       <div className="px-4 py-2">
         <div className="flex items-center mb-1">
-          <span className="text-sm">매수가격 (KRW)</span>
+          <span className="text-sm">{activeTab === "매수" ? "매수가격" : "매도가격"} (KRW)</span>
         </div>
         <div className="flex">
           <input
@@ -71,10 +83,27 @@ export default function TradeForm() {
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             className="flex-1 border rounded-l p-2 text-right"
+            placeholder="가격을 입력하세요"
           />
           <div className="flex border-t border-r border-b rounded-r">
-            <button className="px-3 py-2 text-gray-600">−</button>
-            <button className="px-3 py-2 text-gray-600">+</button>
+            <button 
+              className="px-3 py-2 text-gray-600 hover:bg-gray-100"
+              onClick={() => {
+                const numPrice = parseInt(price.replace(/,/g, '')) || currentPrice;
+                setPrice(new Intl.NumberFormat('ko-KR').format(Math.max(0, numPrice - 1000)));
+              }}
+            >
+              −
+            </button>
+            <button 
+              className="px-3 py-2 text-gray-600 hover:bg-gray-100"
+              onClick={() => {
+                const numPrice = parseInt(price.replace(/,/g, '')) || currentPrice;
+                setPrice(new Intl.NumberFormat('ko-KR').format(numPrice + 1000));
+              }}
+            >
+              +
+            </button>
           </div>
         </div>
       </div>
@@ -110,7 +139,13 @@ export default function TradeForm() {
       {/* Action Buttons */}
       <div className="px-4 py-2 grid grid-cols-2 gap-2">
         <button className="py-3 bg-gray-400 text-white rounded">초기화</button>
-        <button className="py-3 bg-red-500 text-white rounded">매수</button>
+        <button 
+          className={`py-3 text-white rounded ${
+            activeTab === "매수" ? "bg-red-500" : "bg-blue-500"
+          }`}
+        >
+          {activeTab}
+        </button>
       </div>
     </div>
   )
