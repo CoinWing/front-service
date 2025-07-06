@@ -53,6 +53,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ steps.image_name.outputs.image_name }}:${{ steps.version.outputs.version }}
             ${{ env.REGISTRY }}/${{ steps.image_name.outputs.image_name }}:latest 
 
+      #디스코드 메시지 전송 
       - name: Send Discord message on Success
         if: success()
         run: |
