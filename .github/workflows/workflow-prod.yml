@@ -59,7 +59,7 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
           -X POST \
-          -d '{"content":"✅ Front-Service Container 이미지 빌드/푸시 성공! 🎉"}' \
+          -d '{"content":"✅ 🎉🎉Front-Service Container 이미지 빌드/푸시 성공! 🎉🎉"}' \
           ${{ secrets.DISCORD_FRONT_WEBHOOK_URL }}
 
       - name: Read error log summary
