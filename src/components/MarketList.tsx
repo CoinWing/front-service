@@ -49,12 +49,8 @@ export default function MarketList({ filterData }: MarketListProps) {
 
   // 마켓 선택 핸들러
   const handleMarketSelect = async (market: string) => {
-    await setSelectedMarket(market);
-    
-    // 현재 페이지가 exchange 페이지가 아닌 경우 exchange 페이지로 리디렉션
-    if (pathname !== '/exchange') {
-      router.push(`/exchange?market=${market}`);
-    }
+    // URL 변경 감지로만 setSelectedMarket()호출
+    router.push(`/exchange?market=${market}`);
   };
 
   if (isLoading && markets.length === 0) {

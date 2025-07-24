@@ -19,7 +19,7 @@ export default function Holdings() {
   const [activeTab, setActiveTab] = useState("보유자산");
 
   const { tickers } = useMarketStore();
-  const { assets, fetchPortfolio, getDoughnutData, isLoading } = useAssetStore();
+  const { assets, getDoughnutData, isLoading } = useAssetStore();
 
   const [doughnutData, setDoughnutData] = useState<DoughnutData[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -30,21 +30,6 @@ export default function Holdings() {
     setActiveTab(tab);
     router.push(tab === "보유자산" ? '/portfolio/holdings' : '/portfolio/profit-loss');
   };
-
-  // 컴포넌트 마운트 시 portfolio 데이터 가져오기 (한 번만)
-  useEffect(() => {
-    const fetchData = async () => {
-      setError(null);
-      try {
-        await fetchPortfolio();
-      } catch (err: any) {
-        console.error("포트폴리오 데이터 불러오기 실패:", err);
-        setError(err.message || "데이터를 불러오는데 실패했습니다");
-      }
-    };
-
-    fetchData();
-  }, [fetchPortfolio]);
 
   // assets 혹은 tickers 변경 시 도넛 데이터 재계산
   useEffect(() => {

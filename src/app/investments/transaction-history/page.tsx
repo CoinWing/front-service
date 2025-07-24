@@ -7,7 +7,6 @@ import { Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import MarketListCompoenet from "@/components/MarketListComponent";
-import { apiClient } from "@/lib/apiClient";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css'
 import {ko} from "date-fns/locale"
@@ -32,7 +31,7 @@ export default function TransactionHistoryPage() {
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([new Date(), new Date()]);
   const [calenderStart, calenderEnd] = dateRange;
   const { tickers, markets } = useMarketStore();
-  const { tradeHistory: allTradeHistory, fetchTradeHistory } = useAssetStore();
+  const { tradeHistory: allTradeHistory } = useAssetStore();
   const [ checkMonth, setCheckMonth ] = useState(false);
   const [ monthInfo, setMonthInfo ] = useState('');
 
@@ -82,8 +81,6 @@ export default function TransactionHistoryPage() {
   }
 
   const getTradeHistory = async () => {
-    // store에서 거래내역을 가져오기 (캐싱 지원)
-    await fetchTradeHistory();
     
     const end = toDateOnly(default_eTime);
     const start = toDateOnly(default_sTime);

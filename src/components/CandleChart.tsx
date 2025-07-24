@@ -21,12 +21,7 @@ const ChartComponent = createDynamicComponent(
 
 export const CandleChart = () => {
   const { candles, error, selected_time, timeUnit, isFetching, set_selectedTime, set_timeUnit, fetchAdditionCandles } = useCandleStore();
-  const { markets, initializeMarkets, selectedMarket } = useMarketStore();
-
-  // 마켓 초기화 (한 번만 실행)
-  useEffect(() => {
-    initializeMarkets();
-  }, [initializeMarkets]);
+  const { markets,  selectedMarket } = useMarketStore();
 
   // 데이터 가져오기 (의존성 최적화)
   useEffect(() => {

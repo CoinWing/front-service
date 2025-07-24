@@ -1,15 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAssetStore, TradeHistory } from '@/store/assetStore';
+import { useAssetStore } from '@/store/assetStore';
 import { useMarketStore } from '@/store/marketStore';
-import { apiClient } from '@/lib/apiClient';
 
 const ProfitSummary = () => {
   const tickers = useMarketStore(state => state.tickers);
   const { 
     getPeriodProfitLoss, 
-    fetchTradeHistory, 
     tradeHistory, 
     isTradeHistoryLoading 
   } = useAssetStore();
@@ -30,11 +28,6 @@ const ProfitSummary = () => {
       default: return 30;
     }
   };
-
-  // 거래내역 가져오기
-  useEffect(() => {
-    fetchTradeHistory();
-  }, [fetchTradeHistory]);
 
   // 기간별 손익 계산
   useEffect(() => {

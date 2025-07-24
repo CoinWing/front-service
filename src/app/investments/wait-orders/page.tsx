@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import MarketListComponent from "@/components/MarketListComponent";
 import { apiClient } from "@/lib/apiClient";
+import { useAssetStore } from "@/store/assetStore";
 
 type PendingOrder = {
   uuid: string;
@@ -23,26 +24,8 @@ export default function WaitOrders() {
   const router = useRouter();
   const [orderType, setOrderType] = useState("전체주문");
   const [activeTab, setActiveTab] = useState("미체결");
-  const [orders, setOrders] = useState<PendingOrder[]>([]);
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set()); // 선택된 주문 ID를 추적하는 Set
-
-  const fetchPendingOrders = async () => {
-  try {
-    const result = await apiClient.pendingOrders();
-    if (result !== 0) {
-      setOrders(result);
-    } else {
-      console.error("No pending orders found.");
-    }
-  } catch (error) {
-    console.error("Error fetching pending orders:", error);
-  }
-};
-
-
-  useEffect(() => {
-    fetchPendingOrders();
-  }, []);
+  const { pendingInfo } = useAssetStore();
 
   const tabs = ["거래내역", "미체결"];
 
@@ -56,7 +39,7 @@ export default function WaitOrders() {
   };
 
   // 주문 유형별 필터링 (전체, 매수, 매도)
-  const filteredOrders = orders.filter(order => {
+  const filteredOrders = pendingInfo.filter(order => {
     if (orderType === "전체주문") return true;
     if (orderType === "매수주문") return order.orderPosition === "BUY";
     if (orderType === "매도주문") return order.orderPosition === "SELL";
@@ -77,11 +60,6 @@ export default function WaitOrders() {
   // 일괄 취소 버튼 클릭 시
   const handleCancelSelectedOrders = () => {
     console.log("취소할 주문들: ", Array.from(selectedOrders));
-
-    // Remove the canceled orders from the 'orders' state
-    setOrders((prevOrders) =>
-      prevOrders.filter((order) => !selectedOrders.has(order.uuid))
-    );
 
     // Reset the selected orders set
     setSelectedOrders(new Set());

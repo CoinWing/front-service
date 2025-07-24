@@ -52,10 +52,10 @@ export default function CryptoSummary() {
       try {
         // 마켓 정보 초기화
         await initializeMarkets();
-        // 초기 시세 데이터 로드
-        await loadInitialTickers();
         // WebSocket 연결
         await connect();
+        // 초기 시세 데이터 로드
+        await loadInitialTickers();
       } catch (error) {
         console.error('Initialization failed:', error);
       }

@@ -119,17 +119,17 @@ export const useMarketStore = create<MarketState>((set, get) => ({
     
     set({ isLoading: true });
     try {
-      const tickers = await fetchInitialTickers(markets);
-      const currentPrice = tickers[get().selectedMarket]?.trade_price || null;
+      // const tickers = await fetchInitialTickers(markets);
+      const currentPrice = get().tickers[get().selectedMarket]?.trade_price || null;
       
       set({ 
-        tickers, 
+ 
         currentPrice, 
         isLoading: false 
       });
       
-      console.log('Initial tickers loaded:', Object.keys(tickers).length, 'markets');
-      return tickers;
+      console.log('Initial tickers loaded:', Object.keys(get().tickers).length, 'markets');
+      return get().tickers;
     } catch (error) {
       set({ error: '초기 시세 데이터를 가져오는데 실패했습니다.', isLoading: false });
       return {};

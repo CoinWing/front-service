@@ -30,7 +30,7 @@ export default function ProfitLossPage() {
   const tabs = ["보유자산", "투자손익"];
   const router = useRouter();
 
-  const { tradeHistory, fetchTradeHistory, isTradeHistoryLoading } = useAssetStore();
+  const { tradeHistory, isTradeHistoryLoading } = useAssetStore();
   const [chartData, setChartData] = useState<DataByDate[]>([]);
   const [error, setError] = useState<string | null>(null);
   // Store 가져오기
@@ -113,11 +113,6 @@ export default function ProfitLossPage() {
       console.log(`계산된 데이터 ${dataByDate.length}개 생성`);
       return dataByDate;
     };
-
-    // 거래 내역 가져오기
-    useEffect(() => {
-      fetchTradeHistory();
-    }, [fetchTradeHistory]);
 
     // 거래 내역으로부터 차트 데이터 계산
       useEffect(() => {

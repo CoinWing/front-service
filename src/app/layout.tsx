@@ -4,6 +4,7 @@ import "./globals.css"
 import Header from "@/components/Header"
 import WebSocketProvider from "@/providers/WebSocketProvider"
 import Footer from "@/components/Footer"
+import ApiProvider from "@/providers/ApiProvider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -25,6 +26,7 @@ export default function RootLayout({
       <body className={`${inter.className} h-full`}>
         <WebSocketProvider>
           <div className="min-h-full">
+            <ApiProvider />
             <Header />
             <div className="pt-10">
               {children}

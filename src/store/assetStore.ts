@@ -19,6 +19,18 @@ export type TradeHistory = {
   tradeQuantity: number;
 };
 
+// 미체결 타입
+export type Pending = {
+  uuid: string;
+  marketCode: string;
+  orderType: 'LIMIT' | 'MARKET';
+  orderPosition: 'BUY' | 'SELL';
+  totalQuantity: number;
+  orderPrice: number;
+  orderRequestedAt: number;
+  status: string;
+}
+
 interface AssetState {
   assets: PortfolioDto[];
   holdings: number;
@@ -27,7 +39,11 @@ interface AssetState {
   tradeHistory: TradeHistory[];
   isTradeHistoryLoading: boolean;
   tradeHistoryLastFetch: number | null;
+  // 미체결 관련 상태
+  pendingInfo: Pending[];
+  isPendingLoading: boolean;
 
+  fetchPending: () => Promise<void>
   fetchPortfolio: (market_code?: string) => Promise<void>;
   // 거래내역 관련 메서드 추가
   fetchTradeHistory: () => Promise<void>;
@@ -62,6 +78,8 @@ export const useAssetStore = create<AssetState>((set, get) => ({
   tradeHistory: [],
   isTradeHistoryLoading: false,
   tradeHistoryLastFetch: null,
+  pendingInfo: [],
+  isPendingLoading: false,
 
   // 보유코인 및 보유자산 조회
   fetchPortfolio: async (market_code?: string) => {
@@ -83,12 +101,6 @@ export const useAssetStore = create<AssetState>((set, get) => ({
     
     // 이미 로딩 중이면 중복 호출 방지
     if (isTradeHistoryLoading) return;
-    
-    // 5분 이내에 가져온 데이터가 있으면 재사용
-    const cacheTimeout = 5 * 60 * 1000; // 5분
-    if (tradeHistoryLastFetch && Date.now() - tradeHistoryLastFetch < cacheTimeout) {
-      return;
-    }
 
     try {
       set({ isTradeHistoryLoading: true });
@@ -255,8 +267,27 @@ export const useAssetStore = create<AssetState>((set, get) => ({
     const periodProfitLossRate = totalInvestment > 0 ? (periodProfitLoss / totalInvestment) * 100 : 0;
 
     return {
-      periodProfitLoss: Number(periodProfitLoss.toFixed(2)),
-      periodProfitLossRate: Number(periodProfitLossRate.toFixed(2))
+      // -0으로 return되는 것 방지
+      periodProfitLoss: Math.abs(Number(periodProfitLoss.toFixed(2))) === 0 ? 0 : Number(periodProfitLoss.toFixed(2)),
+      periodProfitLossRate: Math.abs(Number(periodProfitLossRate.toFixed(2))) === 0 ? 0 : Number(periodProfitLossRate.toFixed(2))
     };
+  },
+
+  fetchPending: async () => {
+    const { isPendingLoading } = get();
+    if(isPendingLoading) return;
+
+    try {
+      set ({ isPendingLoading: true });
+      const pendings = await apiClient.pendingOrders();
+      set({
+        pendingInfo: pendings || [],
+      });
+    } catch(err) {
+      console.error('Failed to fetch pending: ', err);
+      set({ pendingInfo: [] });
+    } finally {
+      set({ isPendingLoading: false });
+    }
   },
 }));

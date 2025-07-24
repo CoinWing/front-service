@@ -6,16 +6,11 @@ import { useMarketStore } from "@/store/marketStore"
 
 import { apiClient } from "@/lib/apiClient";
 import { useAuthStore } from "@/store/authStore";
-
-type PortfolioItem = {
-  name: string;
-  quantity: number;
-  average_cost: number;
-  total_cost: number;
-}
+import { useAssetStore } from "@/store/assetStore";
 
 export default function TradeForm() {
   const { tickers, selectedMarket } = useMarketStore();
+  const { holdings, assets, fetchPortfolio, fetchTradeHistory, fetchPending } = useAssetStore();
 
   const [activeTab, setActiveTab] = useState("매수")
   const [price, setPrice] = useState("")
@@ -23,9 +18,7 @@ export default function TradeForm() {
   const [ totalPrice, setTotalPrice ] = useState('0');
   const [ coinCnt, setCoinCnt ] = useState(0);
   const [ coinCntInput, setCoinCntInput ] = useState(''); // 입력 중인 텍스트 상태
-  const [ holdings_coin, setHoldingsCoin] = useState('');
   const [ currentPortpolio, setcurrentPortpolio ] = useState({name: selectedMarket, quantity: 0, average_cost: 0, total_cost: 0});
-
   const [inputMode, setInputMode] = useState<'total' | 'count'>("total");
 
   const tabs = [
@@ -37,8 +30,6 @@ export default function TradeForm() {
 
   const [selectedPosition, setSelectedPosition] = useState('지정가');
 
-
-
   useEffect(() => {
     const currentPrice = tickers[selectedMarket]?.trade_price;
     const value = isNaN(Number(currentPrice)) || currentPrice == null ? 0 : Number(currentPrice);
@@ -49,6 +40,10 @@ export default function TradeForm() {
 
     getPortfolio();
   }, [selectedMarket])
+
+  useEffect(() => {
+    getPortfolio();
+  }, [assets, holdings]);
 
   // tickers 데이터가 업데이트될 때 현재 시세로 가격 설정 (초기 로드 시)
   useEffect(() => {
@@ -87,7 +82,6 @@ export default function TradeForm() {
     }
 
     setInputMode('count');
-    getPortfolio();
   }, [totalPrice, price, inputMode])
 
   useEffect(() => {
@@ -99,36 +93,20 @@ export default function TradeForm() {
     }
   }, [price, coinCnt, inputMode])
 
-   useEffect(() => {
-    if (!useAuthStore.getState().isAuthenticated) {
-      setHoldingsCoin('0');
-      return;
-    };
-      fetchAsset();
-  }, []);
-
   // 선택된 마켓의 보유 코인 개수
   const getPortfolio = async () => {
-    try {
-      const portfolio: PortfolioItem[] = await apiClient.userPorfolio();
-      const filterPortfolio = portfolio.filter((item) => item.name === selectedMarket)
-      if (filterPortfolio.length !== 0 ){
-        setcurrentPortpolio(filterPortfolio[0]);
+    if (assets.length) {
+      const portfolio = assets.filter((item) => item.name === selectedMarket)
+      if (portfolio.length !== 0) {
+        setcurrentPortpolio(portfolio[0]);
       } else {
         setcurrentPortpolio({name: selectedMarket, quantity: 0, average_cost: 0, total_cost: 0});
-      }
-    } catch {
+      } 
+    } else {
       setcurrentPortpolio({name: selectedMarket, quantity: 0, average_cost: 0, total_cost: 0});
     }
     
   }
-
-  const fetchAsset = async () => {
-    const asset = await apiClient.userHoldings();
-
-    // 로그인 하지 않았을 경우
-    setHoldingsCoin(new Intl.NumberFormat('ko-KR').format(Number(asset.asset)));
-  };
 
   const submitOrders = async (tab: string): Promise<void> => {
     if (!useAuthStore.getState().isAuthenticated) {
@@ -147,7 +125,7 @@ export default function TradeForm() {
     const coin_ticker = selectedMarket.split('-')[1]
     const orderPrice = parseFloat(price.replace(/,/g, ''));
     const orderType = tab === '매수' ? 'buy' : 'sell';
-    const userHoldings = parseFloat(holdings_coin.replace(/,/g, '')) || 0;
+    const userHoldings = holdings || 0;
 
     // 매수 시 보유 현금 체크
     if (activeTab === '매수') {
@@ -172,8 +150,10 @@ export default function TradeForm() {
           const result = await apiClient.orderMarket(coin_ticker, 'buy', totalAmount, selectedMarket);
             
           if(result.success) {
-            alert(result.message)
-            fetchAsset();
+            alert(result.message);
+            await fetchPortfolio();
+            await fetchTradeHistory();
+            await fetchPending();
           } else {
             alert(result.message)
           }
@@ -186,8 +166,10 @@ export default function TradeForm() {
           const result = await apiClient.orderMarket(coin_ticker, 'sell', coinCnt, selectedMarket);
             
           if(result.success) {
-            alert(result.message)
-            fetchAsset();
+            alert(result.message);
+            await fetchPortfolio();
+            await fetchTradeHistory();
+            await fetchPending();
           } else {
             alert(result.message)
           }
@@ -203,7 +185,9 @@ export default function TradeForm() {
             
             if (result.success) {
               alert(result.message);
-              fetchAsset();
+              await fetchPortfolio();
+              await fetchTradeHistory();
+              await fetchPending();
             } else {
               alert(result.message);
             }
@@ -213,7 +197,9 @@ export default function TradeForm() {
             
             if (result.success) {
               alert(result.message);
-              fetchAsset();
+              await fetchPortfolio();
+              await fetchTradeHistory();
+              await fetchPending();
             } else {
               alert(result.message);
             }
@@ -227,8 +213,6 @@ export default function TradeForm() {
     setCoinCnt(0);
     setCoinCntInput(''); // 입력 텍스트도 초기화
     setInputMode('total');
-
-    getPortfolio();
  }
 
  // 초기화
@@ -286,7 +270,7 @@ export default function TradeForm() {
       {/* Available Balance */}
       <div className="px-4 py-2 flex justify-between">
         <span className="text-sm">보유자산</span>
-        <span className="text-sm font-medium">{holdings_coin} KRW</span>
+        <span className="text-sm font-medium">{new Intl.NumberFormat('ko-KR').format(Number(holdings))} KRW</span>
       </div>
       
       <div className="px-4 py-2 flex justify-between">
@@ -439,7 +423,7 @@ export default function TradeForm() {
                     if (percent !== '직접입력') {
                       const percentValue = parseFloat(percent) / 100;
                       // 매수: 보유자산 기준으로 총액 계산
-                      const holdingsAmount = parseFloat(holdings_coin.replace(/,/g, '') || '0');
+                      const holdingsAmount = holdings || 0;
                       const calculatedAmount = holdingsAmount * percentValue;
                       setTotalPrice(new Intl.NumberFormat('ko-KR').format(Math.floor(calculatedAmount)));
                       

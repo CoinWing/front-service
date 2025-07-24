@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { apiClient } from '@/lib/apiClient';
+import { useAssetStore } from '@/store/assetStore';
 
 type LoginFormProps = {
   onSwitch?: () => void;
@@ -17,6 +18,7 @@ export default function LoginForm({ onSwitch }: LoginFormProps) {
   const { login } = useAuth();
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
+  const { fetchPortfolio, fetchTradeHistory, fetchPending } = useAssetStore();
 
   const [ checkLogin, setCheckLogin ] = useState(false); // 로그인 실패 확인 변수
   const [ loginInfo, setLoginInfo ] = useState<string | undefined>();
@@ -29,6 +31,9 @@ export default function LoginForm({ onSwitch }: LoginFormProps) {
       const result = await login(username, passwd);
       if (result.success) {
         router.push('/'); // 메인 페이지로 리다이렉트
+        fetchPortfolio();
+        fetchTradeHistory();
+        fetchPending();
 
         try {
           const result = await apiClient.userInfo();
