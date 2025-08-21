@@ -13,10 +13,6 @@ import {ko} from "date-fns/locale"
 import { useMarketStore } from "@/store/marketStore";
 import { useAssetStore, TradeHistory } from "@/store/assetStore";
 
-
-
-
-
 export default function TransactionHistoryPage() {
   const router = useRouter();
   const [selectedPeriod, setSelectedPeriod] = useState("1개월")
@@ -81,22 +77,45 @@ export default function TransactionHistoryPage() {
   }
 
   const getTradeHistory = async () => {
-    
     const end = toDateOnly(default_eTime);
     const start = toDateOnly(default_sTime);
 
     const period_items = allTradeHistory.filter((item: TradeHistory) => {
-      const time = toDateOnly(new Date(item.concludedAt));
-
-      if (transactionType === '전체') {
-        return end <= time && time <= start;
-      } else if (transactionType === '매수') {
-        return (end <= time && time <= start) && item.orderPosition === 'BUY';
+      // concludedAt을 Date 객체로 변환 (원본 변경 없음)
+      let itemDate: Date;
+      
+      if (Array.isArray(item.concludedAt)) {
+        const [year, month, day] = item.concludedAt;
+        itemDate = new Date(year, month - 1, day);
       } else {
-        return (end <= time && time <= start) && item.orderPosition === 'SELL';
+        itemDate = new Date(item.concludedAt);
       }
-    })
+      
+      // Date 유효성 검사
+      if (isNaN(itemDate.getTime())) {
+        return false;
+      }
+      
+      const time = toDateOnly(itemDate);
+      
+      // 날짜 범위 필터링
+      const isInDateRange = end <= time && time <= start;
+      if (!isInDateRange) {
+        return false;
+      }
 
+      // 거래 유형별 필터링
+      if (transactionType === '전체') {
+        return true;
+      } else if (transactionType === '매수') {
+        return item.orderPosition === 'BUY';
+      } else if (transactionType === '매도') {
+        return item.orderPosition === 'SELL';
+      }
+      
+      return false;
+    })
+    
     setPeriodTrade(period_items);
   }
 
@@ -142,6 +161,16 @@ export default function TransactionHistoryPage() {
     const term = inputRef.current?.value || '';
     setSearchTerm(term);
   }
+
+  // 헬퍼 함수 추가 (컴포넌트 내부에)
+  const parseConcludedAt = (concludedAt: any): Date => {
+    if (Array.isArray(concludedAt)) {
+      const [year, month, day, hour, minute, second] = concludedAt;
+      return new Date(year, month - 1, day, hour, minute, second);
+    } else {
+      return new Date(concludedAt);
+    }
+  };
 
   return (
     <main className="grid grid-cols-3 gap-2 min-h-screen p-4 md:p-8 bg-gray-50">
@@ -298,7 +327,9 @@ export default function TransactionHistoryPage() {
                         filterData.map((history, idx) => {
                           return (
                            <tr key={idx} className="">
-                            <td className="text-center text-gray-500 text-xs py-3">{format(new Date(history.concludedAt), 'yyyy.MM.dd hh:mm')}</td>
+                            <td className="text-center text-gray-500 text-xs py-3">
+                              {format(parseConcludedAt(history.concludedAt), 'yyyy.MM.dd hh:mm')}
+                            </td>
                             <td className="text-center text-gray-500 text-xs py-3">{history.marketCode.split('-')[1]}</td>
                             <td className="text-center text-gray-500 text-xs py-3">{history.marketCode.split('-')[0]}</td>
                             <td id="orderPosition" className={`text-center text-xs py-3 ${history.orderPosition === "BUY"?"text-blue-600":"text-red-600"}`}>{history.orderPosition}</td>
@@ -308,7 +339,7 @@ export default function TransactionHistoryPage() {
                             <td className="text-center text-gray-500 text-xs py-3">{(history.tradePrice * 0.0005).toFixed(2)}</td>
                             <td className="text-center text-gray-500 text-xs py-3">{(history.tradePrice + (history.tradePrice * 0.0005)).toFixed(2)}</td>
                             {/* 주문시간은 api에 없어서 체결시간으로 대체 */}
-                            <td className="text-center text-gray-500 text-xs py-3">{format(new Date(history.concludedAt), 'yyyy.MM.dd hh:mm')}</td>
+                            <td className="text-center text-gray-500 text-xs py-3">{format(parseConcludedAt(history.concludedAt), 'yyyy.MM.dd hh:mm')}</td>
                           </tr>
                           )
                         })}
