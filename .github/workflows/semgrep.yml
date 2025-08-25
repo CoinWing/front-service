@@ -3,10 +3,14 @@ name: Semgrep CI for front
 on:
   pull_request:
     branches:
-      - "**"
+      - "prod"
+    paths-ignore:
+      - "**.md"
   push:
     branches:
-      - "**"
+      - "prod"
+    paths-ignore:
+      - "**.md"
   workflow_dispatch: {}
 
 permissions:
