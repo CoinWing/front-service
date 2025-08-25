@@ -99,7 +99,7 @@ export default function CumulativeChart({chartData, isTradeHistoryLoading, chart
         },
         options: {
           responsive: true,
-          maintainAspectRatio: false,
+          maintainAspectRatio: false, // ProfitLossChart와 동일
           interaction: {
             intersect: false,
             mode: 'index',
@@ -108,20 +108,11 @@ export default function CumulativeChart({chartData, isTradeHistoryLoading, chart
             title: {
               display: true,
               text: '일별 누적 손익률',
-              font: {
-                size: 16,
-                weight: 'bold'
-              }
             },
             legend: {
               display: false
             },
             tooltip: {
-              backgroundColor: 'rgba(0,0,0,0.8)',
-              titleColor: 'white',
-              bodyColor: 'white',
-              borderColor: 'rgba(255,255,255,0.3)',
-              borderWidth: 1,
               callbacks: {
                 label: function(context) {
                   const value = context.parsed.y;
@@ -132,22 +123,30 @@ export default function CumulativeChart({chartData, isTradeHistoryLoading, chart
           },
           scales: {
             y: {
-              min: yMin,
-              max: yMax,
+              suggestedMin: yMin, // ProfitLossChart와 동일한 방식
+              suggestedMax: yMax,
+              title: {
+                display: true,
+                text: '손익률 (%)'
+              },
               ticks: {
                 stepSize: stepSize,
+                maxTicksLimit: 9, // ProfitLossChart와 동일
+                autoSkip: false, // ProfitLossChart와 동일
                 callback: function(value) {
                   return `${Number(value).toFixed(2)}%`;
                 }
               },
               grid: {
-                color: 'rgba(0,0,0,0.1)'
+                color: 'rgba(0, 0, 0, 0.05)', // ProfitLossChart와 동일
+                tickLength: 0, // ProfitLossChart와 동일
               }
             },
             x: {
-              grid: {
-                color: 'rgba(0,0,0,0.1)'
+              title: {
+                display: true,
               },
+              grid: { display: false }, // ProfitLossChart와 동일
               ticks: {
                 maxTicksLimit: 10,
                 callback: function(value, index) {
@@ -165,51 +164,32 @@ export default function CumulativeChart({chartData, isTradeHistoryLoading, chart
     };
 
     drawChart();
+
+    return () => {
+      chartRef.current?.destroy();
+      chartRef.current = null;
+    }
   }, [chartData]);
 
-  // 컴포넌트 언마운트 시 차트 정리
-  useEffect(() => {
-    return () => {
-      if (chartRef.current) {
-        chartRef.current.destroy();
-        chartRef.current = null;
-      }
-    };
-  }, []);
-
-  if (isTradeHistoryLoading) {
-    return (
-      <div className="w-full h-64 border rounded-lg bg-white p-4">
-        <div className="flex justify-center items-center h-full">
-          <p>데이터를 불러오는 중...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (chartError) {
-    return (
-      <div className="w-full h-64 border rounded-lg bg-white p-4">
-        <div className="flex justify-center items-center h-full">
-          <p className="text-red-500">{chartError}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (chartData.length === 0) {
-    return (
-      <div className="w-full h-64 border rounded-lg bg-white p-4">
-        <div className="flex justify-center items-center h-full">
-          <p>표시할 데이터가 없습니다.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full h-64 border rounded-lg bg-white p-4">
-      <canvas ref={canvasRef} />
+    <div className="w-full h-[500px] flex flex-col justify-center items-center p-4 rounded-xl bg-white">
+      <div className="w-full h-full relative">
+        {isTradeHistoryLoading ? (
+          <div className="absolute inset-0 flex justify-center items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent" />
+          </div>
+        ) : chartError ? (
+          <div className="absolute inset-0 flex justify-center items-center text-gray-500">
+            {chartError}
+          </div>
+        ) : chartData.length === 0 ? (
+          <div className="absolute inset-0 flex justify-center items-center text-gray-500">
+            차트 데이터가 없습니다.
+          </div>
+        ) : (
+          <canvas ref={canvasRef} />
+        )}
+      </div>
     </div>
   );
 }
