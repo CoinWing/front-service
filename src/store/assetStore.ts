@@ -60,6 +60,15 @@ interface AssetState {
     periodProfitLoss: number;
     periodProfitLossRate: number;
   };
+
+  // 누적 손익 계산 함수 추가
+  getCumulativeProfitLoss: (
+    tradeHistory: TradeHistory[], 
+    tickers: Record<string, any>
+  ) => {
+    profitLoss: number;
+    profitLossRate: number;
+  };
 }
 
 // 보유코인 및 보유자산 조회 후 하나의 배열로 반환
@@ -181,6 +190,103 @@ export const useAssetStore = create<AssetState>((set, get) => ({
       totalProfitLoss,     // 총 평가 손익
       totalProfitLossRate  // 총 평가 수익률
     ];
+  },
+
+  // 누적 손익 계산 함수 (차트용)
+  getCumulativeProfitLoss: (
+    tradeHistory: TradeHistory[], 
+    tickers: Record<string, any>
+  ) => {
+    console.log('[getCumulativeProfitLoss] 누적 손익 계산 시작:', { tradeHistory, tickers });
+    
+    const { getCurrentPrice } = get();
+    let totalRealizedProfitLoss = 0;
+    let totalInvestment = 0; // 총 투자금 (매수금액 누적)
+    const portfolioChanges: Record<string, { quantity: number; totalCost: number; avgPrice: number }> = {};
+
+    // 거래내역을 시간순으로 정렬
+    const sortedTrades = [...tradeHistory].sort((a, b) => {
+      let dateA: Date, dateB: Date;
+      
+      if (Array.isArray(a.concludedAt)) {
+        const [year, month, day, hour = 0, minute = 0, second = 0] = a.concludedAt;
+        dateA = new Date(year, month - 1, day, hour, minute, second);
+      } else {
+        dateA = new Date(a.concludedAt);
+      }
+      
+      if (Array.isArray(b.concludedAt)) {
+        const [year, month, day, hour = 0, minute = 0, second = 0] = b.concludedAt;
+        dateB = new Date(year, month - 1, day, hour, minute, second);
+      } else {
+        dateB = new Date(b.concludedAt);
+      }
+      
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    // 각 거래를 순회하며 누적 손익 계산
+    sortedTrades.forEach((trade) => {
+      const market = trade.marketCode;
+      
+      if (!portfolioChanges[market]) {
+        portfolioChanges[market] = { quantity: 0, totalCost: 0, avgPrice: 0 };
+      }
+
+      if (trade.orderPosition === 'BUY') {
+        // 매수: 평균 단가 재계산 및 총 투자금 증가
+        totalInvestment += trade.tradePrice; // 총 투자금 누적
+        portfolioChanges[market].quantity += trade.tradeQuantity;
+        portfolioChanges[market].totalCost += trade.tradePrice;
+        portfolioChanges[market].avgPrice = portfolioChanges[market].totalCost / portfolioChanges[market].quantity;
+        
+      } else if (trade.orderPosition === 'SELL') {
+        // 매도: 실현 손익 계산
+        const sellCost = portfolioChanges[market].avgPrice * trade.tradeQuantity;
+        const sellProfit = trade.tradePrice - sellCost;
+        
+        totalRealizedProfitLoss += sellProfit;
+        
+        portfolioChanges[market].quantity -= trade.tradeQuantity;
+        portfolioChanges[market].totalCost -= sellCost;
+        
+        if (portfolioChanges[market].quantity <= 0) {
+          portfolioChanges[market].avgPrice = 0;
+          portfolioChanges[market].totalCost = 0;
+        } else {
+          portfolioChanges[market].avgPrice = portfolioChanges[market].totalCost / portfolioChanges[market].quantity;
+        }
+      }
+    });
+
+    // 미실현 손익 계산
+    let totalUnrealizedProfitLoss = 0;
+    Object.entries(portfolioChanges).forEach(([market, changes]) => {
+      if (changes.quantity > 0) {
+        const currentPrice = getCurrentPrice(market, tickers);
+        const currentValue = changes.quantity * currentPrice;
+        const unrealizedProfit = currentValue - changes.totalCost;
+        totalUnrealizedProfitLoss += unrealizedProfit;
+      }
+    });
+
+    // 총 누적 손익
+    const totalProfitLoss = totalRealizedProfitLoss + totalUnrealizedProfitLoss;
+    
+    const profitLossRate = totalInvestment > 0 ? (totalProfitLoss / totalInvestment) * 100 : 0;
+
+    console.log('[getCumulativeProfitLoss] 결과:', {
+      totalRealizedProfitLoss,
+      totalUnrealizedProfitLoss,
+      totalProfitLoss,
+      totalInvestment,
+      profitLossRate
+    });
+
+    return {
+      profitLoss: Number(totalProfitLoss.toFixed(2)),
+      profitLossRate: Number(profitLossRate.toFixed(2))
+    };
   },
 
   // 기간 누적 손익 계산 (거래내역 기반)

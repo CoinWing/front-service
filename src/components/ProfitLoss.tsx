@@ -41,7 +41,7 @@ export default function ProfitLossPage() {
   const tickers = useMarketStore(state => state.tickers);
   const { loadInitialData } = useMarketStore();
   const assets = useAssetStore(state => state.assets);
-  const { getPeriodProfitLoss } = useAssetStore();
+  const { getPeriodProfitLoss, getCumulativeProfitLoss } = useAssetStore();
   
   // 최초 계산 여부를 추적하는 ref
   const hasCalculatedRef = useRef(false);
@@ -199,15 +199,15 @@ export default function ProfitLossPage() {
 
       try {
         // 전체 누적 데이터 계산 (days = 0으로 전체 기간)
-        const profitLossData = getPeriodProfitLoss(accumulatedTrades, tickers, 0);
+        const profitLossData = getCumulativeProfitLoss(accumulatedTrades, tickers);
         
-        console.log(`    - 계산 결과: 손익=${profitLossData.periodProfitLoss}, 수익률=${profitLossData.periodProfitLossRate}%`);
+        console.log(`    - 계산 결과: 손익=${profitLossData.profitLoss}, 수익률=${profitLossData.profitLossRate}%`);
 
         // 결과 저장 (년-월-일 기준으로 하나의 데이터 포인트)
         dataByDate.push({
           date,
-          profitLossRate: Number(profitLossData.periodProfitLossRate.toFixed(2)),
-          profitLoss: Math.floor(profitLossData.periodProfitLoss)
+          profitLossRate: Number(profitLossData.profitLossRate.toFixed(2)),
+          profitLoss: Math.floor(profitLossData.profitLoss)
         });
         
       } catch (err) {
@@ -246,7 +246,7 @@ export default function ProfitLossPage() {
       console.error("차트 데이터 계산 중 오류:", err);
       setError("데이터 계산 중 오류가 발생했습니다.");
     }
-  }, [tradeHistory, tickers, isTradeHistoryLoading, getPeriodProfitLoss]);
+  }, [tradeHistory, tickers, isTradeHistoryLoading, getPeriodProfitLoss, getCumulativeProfitLoss]);
 
   return (
     <main className="grid grid-cols-3 gap-2 min-h-screen p-4 md:p-8 bg-gray-50">
