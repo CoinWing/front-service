@@ -9,7 +9,8 @@ const ProfitSummary = () => {
   const { 
     getPeriodProfitLoss, 
     tradeHistory, 
-    isTradeHistoryLoading 
+    isTradeHistoryLoading,
+    fetchTradeHistory // fetchTradeHistory 추가
   } = useAssetStore();
 
   const [selectedPeriod, setSelectedPeriod] = useState("1주일");
@@ -29,14 +30,37 @@ const ProfitSummary = () => {
     }
   };
 
+  // 컴포넌트 마운트 시 데이터 로드 확인
+  useEffect(() => {
+    console.log('=== ProfitLossNum Debug ===');
+    console.log('tradeHistory length:', tradeHistory.length);
+    console.log('tradeHistory:', tradeHistory);
+    console.log('tickers keys length:', Object.keys(tickers).length);
+    console.log('tickers:', tickers);
+    console.log('isTradeHistoryLoading:', isTradeHistoryLoading);
+    
+    // 데이터가 없으면 다시 로드 시도
+    if (tradeHistory.length === 0 && !isTradeHistoryLoading) {
+      console.log('Attempting to fetch trade history...');
+      fetchTradeHistory();
+    }
+  }, [tradeHistory, tickers, isTradeHistoryLoading, fetchTradeHistory]);
+
   // 기간별 손익 계산
   useEffect(() => {
+    console.log('=== Calculation useEffect ===');
+    console.log('isTradeHistoryLoading:', isTradeHistoryLoading);
+    console.log('tickers length:', Object.keys(tickers).length);
+    console.log('tradeHistory length:', tradeHistory.length);
+    
     if (isTradeHistoryLoading || !tickers || Object.keys(tickers).length === 0) {
+      console.log('Setting displayData to null - loading or no tickers');
       setDisplayData(null);
       return;
     }
 
     if (tradeHistory.length === 0) {
+      console.log('Setting displayData to 0 - no trade history');
       setDisplayData({
         periodProfitLoss: 0,
         periodProfitLossRate: 0
@@ -45,7 +69,11 @@ const ProfitSummary = () => {
     }
 
     const days = getPeriodDays(selectedPeriod);
+    console.log('Calculating for period:', selectedPeriod, 'days:', days);
+    
     const profitLossData = getPeriodProfitLoss(tradeHistory, tickers, days);
+    console.log('Calculated profit/loss data:', profitLossData);
+    
     setDisplayData(profitLossData);
   }, [selectedPeriod, tradeHistory, tickers, isTradeHistoryLoading, getPeriodProfitLoss]);
 
@@ -85,7 +113,7 @@ const ProfitSummary = () => {
             <div className="flex space-x-2">
               <p className={`text-6xl font-bold ${displayData.periodProfitLossRate >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
                 {displayData.periodProfitLossRate >= 0 ? '+' : ''}
-                {Math.floor(displayData.periodProfitLossRate).toLocaleString()}
+                {displayData.periodProfitLossRate.toFixed(2)}
               </p>
               <p className="text-gray-500 font-semibold text-xl self-end">%</p>
             </div>

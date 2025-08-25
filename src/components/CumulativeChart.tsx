@@ -83,7 +83,7 @@ export default function CumulativeChart({chartData, isTradeHistoryLoading, chart
           labels: chartData.map(item => item.date),
           datasets: [
             {
-              label: "누적 수익률 (%)",
+              label: "일별 누적 손익률 (%)",
               data: chartData.map(item => item.profitLossRate),
               borderColor: lastValue >= 0 ? "#ff6384" : "#36A2EB",
               backgroundColor: gradientFill,
@@ -99,85 +99,117 @@ export default function CumulativeChart({chartData, isTradeHistoryLoading, chart
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            intersect: false,
+            mode: 'index',
+          },
           plugins: {
-            legend: { display: false },
             title: {
               display: true,
-              text: "일별 누적 수익률 추이",
+              text: '일별 누적 손익률',
+              font: {
+                size: 16,
+                weight: 'bold'
+              }
+            },
+            legend: {
+              display: false
             },
             tooltip: {
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              titleColor: 'white',
+              bodyColor: 'white',
+              borderColor: 'rgba(255,255,255,0.3)',
+              borderWidth: 1,
               callbacks: {
-                label: function (context) {
+                label: function(context) {
                   const value = context.parsed.y;
-                  return (value >= 0 ? '+' : '') + value.toFixed(2) + "%";
-                },
-              },
-            },
+                  return `손익률: ${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
+                }
+              }
+            }
           },
           scales: {
-            x: {
-              title: {
-                display: true,
-              },
-              grid: { display: false },
-            },
             y: {
-              suggestedMin: yMin,
-              suggestedMax: yMax,
-              title: {
-                display: true,
-                text: '수익률 (%)'
-              },
+              min: yMin,
+              max: yMax,
               ticks: {
-                // 동적으로 계산된 간격으로 눈금 표시
                 stepSize: stepSize,
-                // 최대 9개 눈금으로 제한
-                maxTicksLimit: 9,
-                // 자동 스킵 방지
-                autoSkip: false,
-                callback: function (value) {
-                  const numValue = Number(value);
-                  return (numValue >= 0 ? '+' : '') + numValue + "%";
-                },
+                callback: function(value) {
+                  return `${Number(value).toFixed(2)}%`;
+                }
               },
               grid: {
-                color: 'rgba(0, 0, 0, 0.05)',
-                tickLength: 0,
-              },
+                color: 'rgba(0,0,0,0.1)'
+              }
             },
-          },
-          // 자동 크기 계산 비활성화 
-          maintainAspectRatio: false,
-        },
+            x: {
+              grid: {
+                color: 'rgba(0,0,0,0.1)'
+              },
+              ticks: {
+                maxTicksLimit: 10,
+                callback: function(value, index) {
+                  const date = chartData[index]?.date;
+                  if (date) {
+                    return date.slice(5); // MM-DD 형식으로 표시
+                  }
+                  return '';
+                }
+              }
+            }
+          }
+        }
       });
     };
+
     drawChart();
-    
-    return () => {
-      chartRef.current?.destroy();
-      chartRef.current = null;
-    }
   }, [chartData]);
 
-  return (
-    <div className="w-full h-[500px] flex flex-col justify-center items-center p-4 rounded-xl bg-white">
-      <div className="w-full h-full relative">
-        {isTradeHistoryLoading ? (
-          <div className="absolute inset-0 flex justify-center items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent" />
-          </div>
-        ) : chartError ? (
-          <div className="absolute inset-0 flex justify-center items-center text-gray-500">
-            {chartError}
-          </div>
-        ) : chartData.length === 0 ? (
-          <div className="absolute inset-0 flex justify-center items-center text-gray-500">
-            차트 데이터가 없습니다.
-          </div>
-        ) : (
-          <canvas ref={canvasRef} />
-        )}
+  // 컴포넌트 언마운트 시 차트 정리
+  useEffect(() => {
+    return () => {
+      if (chartRef.current) {
+        chartRef.current.destroy();
+        chartRef.current = null;
+      }
+    };
+  }, []);
+
+  if (isTradeHistoryLoading) {
+    return (
+      <div className="w-full h-64 border rounded-lg bg-white p-4">
+        <div className="flex justify-center items-center h-full">
+          <p>데이터를 불러오는 중...</p>
+        </div>
       </div>
+    );
+  }
+
+  if (chartError) {
+    return (
+      <div className="w-full h-64 border rounded-lg bg-white p-4">
+        <div className="flex justify-center items-center h-full">
+          <p className="text-red-500">{chartError}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (chartData.length === 0) {
+    return (
+      <div className="w-full h-64 border rounded-lg bg-white p-4">
+        <div className="flex justify-center items-center h-full">
+          <p>표시할 데이터가 없습니다.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-64 border rounded-lg bg-white p-4">
+      <canvas ref={canvasRef} />
     </div>
   );
 }

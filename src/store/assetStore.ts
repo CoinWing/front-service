@@ -189,19 +189,51 @@ export const useAssetStore = create<AssetState>((set, get) => ({
     tickers: Record<string, any>, 
     days: number
   ) => {
-    const { getCurrentPrice } = get();
+    console.log('[getPeriodProfitLoss] 입력 데이터:', { tradeHistory, tickers, days });
     
+    const { getCurrentPrice } = get();
+
     // N일 전 날짜 계산
     const nDaysAgo = new Date();
     nDaysAgo.setDate(nDaysAgo.getDate() - days);
-    
+    console.log('[getPeriodProfitLoss] 기간 계산:', { days, nDaysAgo: nDaysAgo.toISOString() });
+
     // 기간 내 거래 필터링
     const periodTrades = tradeHistory.filter(trade => {
-      const tradeDate = new Date(trade.concludedAt);
-      return tradeDate >= nDaysAgo;
+      // concludedAt을 Date 객체로 변환 (원본 변경 없음)
+      let tradeDate: Date;
+      
+      if (Array.isArray(trade.concludedAt)) {
+        const [year, month, day] = trade.concludedAt;
+        tradeDate = new Date(year, month - 1, day);
+      } else {
+        tradeDate = new Date(trade.concludedAt);
+      }
+      
+      // Date 유효성 검사
+      if (isNaN(tradeDate.getTime())) {
+        console.log('[getPeriodProfitLoss] 유효하지 않은 날짜:', trade.concludedAt);
+        return false;
+      }
+      
+      const isInPeriod = tradeDate >= nDaysAgo;
+      console.log('[getPeriodProfitLoss] 날짜 비교:', {
+        concludedAt: trade.concludedAt,
+        tradeDate: tradeDate.toISOString(),
+        nDaysAgo: nDaysAgo.toISOString(),
+        isInPeriod
+      });
+      
+      return isInPeriod;
+    });
+    console.log('[getPeriodProfitLoss] 기간 내 거래 필터링:', { 
+      totalTrades: tradeHistory.length, 
+      periodTrades: periodTrades.length,
+      periodTradesData: periodTrades 
     });
 
     if (periodTrades.length === 0) {
+      console.log('[getPeriodProfitLoss] 기간 내 거래 없음 - 0 반환');
       return {
         periodProfitLoss: 0,
         periodProfitLossRate: 0,
@@ -210,67 +242,114 @@ export const useAssetStore = create<AssetState>((set, get) => ({
 
     // 기간 내 투자금 및 실현손익 계산
     let totalInvestment = 0;  // 총 투자금 (매수금액)
-    let totalRealization = 0; // 총 실현금액 (매도금액)
-    const portfolioChanges: Record<string, { quantity: number; totalCost: number }> = {};
+    let totalRealizedProfitLoss = 0; // 총 실현금액 (매도금액)
+    const portfolioChanges: Record<string, { quantity: number; totalCost: number; avgPrice: number }> = {};
 
     // 거래내역을 시간순으로 정렬
     const sortedTrades = [...periodTrades].sort((a, b) => 
       new Date(a.concludedAt).getTime() - new Date(b.concludedAt).getTime()
     );
+    console.log('[getPeriodProfitLoss] 정렬된 거래내역:', sortedTrades);
 
     // 각 거래를 순회하며 포트폴리오 변화량 및 투자/실현 금액 계산
-    sortedTrades.forEach(trade => {
+    sortedTrades.forEach((trade, index) => {
       const market = trade.marketCode;
+      console.log(`[getPeriodProfitLoss] 거래 처리 ${index + 1}/${sortedTrades.length}:`, trade);
       
       if (!portfolioChanges[market]) {
-        portfolioChanges[market] = { quantity: 0, totalCost: 0 };
+        portfolioChanges[market] = { quantity: 0, totalCost: 0, avgPrice: 0 };
       }
 
       if (trade.orderPosition === 'BUY') {
-        // 매수: 투자금 증가, 보유량 증가
-        totalInvestment += trade.tradePrice;
+        // 매수: 평균 단가 재계산 및 총 투자금 증가
+        const beforeInvestment = totalInvestment;
+        const beforePortfolio = { ...portfolioChanges[market] };
+        
+        totalInvestment += trade.tradePrice; // 총 투자금 증가
         portfolioChanges[market].quantity += trade.tradeQuantity;
         portfolioChanges[market].totalCost += trade.tradePrice;
-      } else if (trade.orderPosition === 'SELL') {
-        // 매도: 실현금액 증가, 보유량 감소
-        totalRealization += trade.tradePrice;
-        portfolioChanges[market].quantity -= trade.tradeQuantity;
+        portfolioChanges[market].avgPrice = portfolioChanges[market].totalCost / portfolioChanges[market].quantity;
         
-        // 매도한 만큼 비례적으로 원가 감소
-        const sellRatio = trade.tradeQuantity / (portfolioChanges[market].quantity + trade.tradeQuantity);
-        portfolioChanges[market].totalCost -= portfolioChanges[market].totalCost * sellRatio;
+        console.log(`[getPeriodProfitLoss] 매수 처리:`, {
+          market,
+          tradePrice: trade.tradePrice,
+          tradeQuantity: trade.tradeQuantity,
+          before: { investment: beforeInvestment, portfolio: beforePortfolio },
+          after: { investment: totalInvestment, portfolio: portfolioChanges[market] }
+        });
+        
+      } else if (trade.orderPosition === 'SELL') {
+        // 매도: 평균 단가 기준으로 실현 손익 계산
+        const beforeRealized = totalRealizedProfitLoss;
+        const beforePortfolio = { ...portfolioChanges[market] };
+        
+        const sellCost = portfolioChanges[market].avgPrice * trade.tradeQuantity;
+        const sellProfit = trade.tradePrice - sellCost;
+        
+        totalRealizedProfitLoss += sellProfit; // 실현 손익 누적
+        
+        portfolioChanges[market].quantity -= trade.tradeQuantity;
+        portfolioChanges[market].totalCost -= sellCost;
+        
+        // 수량이 0이 되면 평균가 리셋
+        if (portfolioChanges[market].quantity <= 0) {
+          portfolioChanges[market].avgPrice = 0;
+          portfolioChanges[market].totalCost = 0;
+        } else {
+          portfolioChanges[market].avgPrice = portfolioChanges[market].totalCost / portfolioChanges[market].quantity;
+        }
+        
+        console.log(`[getPeriodProfitLoss] 매도 처리:`, {
+          market,
+          tradePrice: trade.tradePrice,
+          tradeQuantity: trade.tradeQuantity,
+          sellCost,
+          sellProfit,
+          before: { realized: beforeRealized, portfolio: beforePortfolio },
+          after: { realized: totalRealizedProfitLoss, portfolio: portfolioChanges[market] }
+        });
       }
     });
 
-    // 미실현 손익 계산 (기간 중 보유량 변화분의 현재가치)
-    let unrealizedProfitLoss = 0;
-    
+    console.log('[getPeriodProfitLoss] 거래 처리 완료:', {
+      totalInvestment,
+      totalRealizedProfitLoss,
+      portfolioChanges
+    });
+
+    // 미실현 손익: 현재 보유 중인 코인의 손익만 계산
+    let totalUnrealizedProfitLoss = 0;
     Object.entries(portfolioChanges).forEach(([market, changes]) => {
       if (changes.quantity > 0) {
-        // 보유량이 증가한 경우: 현재가치 - 투자원가
         const currentPrice = getCurrentPrice(market, tickers);
         const currentValue = changes.quantity * currentPrice;
-        unrealizedProfitLoss += (currentValue - changes.totalCost);
-      } else if (changes.quantity < 0) {
-        // 보유량이 감소한 경우: 이미 실현손익에 반영됨
-        // 추가 계산 필요 없음
+        const unrealizedProfit = currentValue - changes.totalCost;
+        totalUnrealizedProfitLoss += unrealizedProfit;
       }
     });
 
-    // 실현 손익 (매도금액 - 매도한 코인들의 원가)
-    const realizedProfitLoss = totalRealization - (totalInvestment * (totalRealization / (totalInvestment + Math.abs(totalRealization - totalInvestment))));
+    // 총 손익 = 실현 손익 + 미실현 손익
+    const periodProfitLoss = totalRealizedProfitLoss + totalUnrealizedProfitLoss;
 
-    // 총 기간 누적 손익 = 실현손익 + 미실현손익
-    const periodProfitLoss = realizedProfitLoss + unrealizedProfitLoss;
-    
     // 기간 수익률 계산 (투자금 대비)
     const periodProfitLossRate = totalInvestment > 0 ? (periodProfitLoss / totalInvestment) * 100 : 0;
 
-    return {
+    const result = {
       // -0으로 return되는 것 방지
       periodProfitLoss: Math.abs(Number(periodProfitLoss.toFixed(2))) === 0 ? 0 : Number(periodProfitLoss.toFixed(2)),
       periodProfitLossRate: Math.abs(Number(periodProfitLossRate.toFixed(2))) === 0 ? 0 : Number(periodProfitLossRate.toFixed(2))
     };
+
+    console.log('[getPeriodProfitLoss] 최종 결과:', {
+      totalInvestment,
+      totalRealizedProfitLoss,
+      totalUnrealizedProfitLoss,
+      periodProfitLoss,
+      periodProfitLossRate,
+      result
+    });
+
+    return result;
   },
 
   fetchPending: async () => {
